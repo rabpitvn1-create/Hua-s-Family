@@ -81,6 +81,12 @@
     return Math.min(max, Math.max(min, value));
   }
 
+  function clampDelta(value, min, max) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return 0;
+    return clamp(Math.round(numeric), min, max);
+  }
+
   function resolve(value) {
     return typeof value === "function" ? value(state) : value;
   }
@@ -127,6 +133,63 @@
       state.log.unshift(...entries);
       state.log = state.log.slice(0, 7);
     }
+  }
+
+  function paragraphToText(paragraph) {
+    if (typeof paragraph === "string") return paragraph;
+    if (!paragraph || typeof paragraph !== "object") return "";
+    if (paragraph.type === "dialogue") {
+      return `${paragraph.speaker || "Nhân vật"}: ${paragraph.text || ""}`;
+    }
+    return paragraph.text || "";
+  }
+
+  function getPublicSnapshot() {
+    const scene = data.scenes[state.sceneId];
+    const paragraphs = scene ? (resolve(scene.paragraphs) || []) : [];
+
+    return {
+      sceneId: state.sceneId,
+      sceneTitle: scene?.title || "Không rõ",
+      sceneKicker: scene?.kicker || "HỒ SƠ",
+      sceneText: paragraphs.map(paragraphToText).filter(Boolean).join("\n"),
+      stats: clone(state.stats),
+      flags: clone(state.flags),
+      log: state.log.slice(0, 7),
+      recentScenes: state.history.slice(-6)
+    };
+  }
+
+  function applyAiOutcome(rawEffects, summary) {
+    const effects = rawEffects && typeof rawEffects === "object" ? rawEffects : {};
+    const safeStats = {
+      alert: clampDelta(effects.alertDelta, -5, 12),
+      ritual: clampDelta(effects.ritualDelta, -6, 10),
+      civilianSafety: clampDelta(effects.civilianSafetyDelta, -8, 2),
+      evidence: clampDelta(effects.evidenceDelta, 0, 1)
+    };
+
+    if (state.flags.contactStarted) {
+      safeStats.time = clampDelta(effects.timeDelta, -12, 0);
+      safeStats.control = clampDelta(effects.controlDelta, -8, 8);
+      safeStats.signalRisk = clampDelta(effects.signalRiskDelta, -5, 12);
+    }
+
+    const cleanSummary = typeof summary === "string"
+      ? summary.replace(/\s+/g, " ").trim().slice(0, 180)
+      : "";
+
+    applyEffects({
+      stats: safeStats,
+      log: cleanSummary ? `Quản trò AI: ${cleanSummary}` : "Quản trò AI đã xử lý một hành động tự do."
+    });
+
+    autoSave();
+    renderStatus();
+
+    const snapshot = getPublicSnapshot();
+    window.dispatchEvent(new CustomEvent("hua:ai-effects-applied", { detail: snapshot }));
+    return snapshot;
   }
 
   function enterScene(sceneId, effects) {
@@ -198,6 +261,7 @@
 
     renderStatus();
     document.title = `${scene.title} — Hứa Gia: LIBERA-1899`;
+    window.dispatchEvent(new CustomEvent("hua:scene-rendered", { detail: getPublicSnapshot() }));
   }
 
   function renderStatus() {
@@ -348,6 +412,11 @@
     if (Number.isInteger(index) && index >= 0 && buttons[index]) {
       buttons[index].click();
     }
+  });
+
+  window.HUA_GAME_BRIDGE = Object.freeze({
+    getSnapshot: getPublicSnapshot,
+    applyAiOutcome
   });
 
   loadGame(false);
