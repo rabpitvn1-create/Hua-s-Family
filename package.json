@@ -1,0 +1,14 @@
+{
+  "name": "hua-family-libera-1899",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "check": "node --check api/gemini-turn.js && node --check src/ai-game-master.js && node --check src/game.js",
+    "test:gemini": "node scripts/test-gemini.mjs"
+  }
+}

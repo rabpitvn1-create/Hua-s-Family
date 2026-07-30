@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/gemini-turn.js": {
+      "maxDuration": 30
+    }
+  }
+}

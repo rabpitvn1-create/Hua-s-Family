@@ -4,13 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#120e0d">
-  <meta name="description" content="Text game Hứa Gia: LIBERA-1899 — Vertical Slice 0.2, cuộc tiếp xúc đầu tiên giữa Kai và Hứa Tiểu Lan.">
+  <meta name="description" content="Text game Hứa Gia: LIBERA-1899 — Vertical Slice 0.3, tích hợp quản trò Gemini cho hành động tự do.">
   <title>Hứa Gia: LIBERA-1899</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="ai-styles.css">
   <script src="src/story.js" defer></script>
   <script src="src/encounters.js" defer></script>
   <script src="src/game.js" defer></script>
   <script src="src/dialogue-avatars.js" defer></script>
+  <script src="src/ai-game-master.js" defer></script>
 </head>
 <body>
   <noscript>Trò chơi cần JavaScript để vận hành.</noscript>
@@ -21,7 +23,7 @@
         <p class="eyebrow">ELYSIUM // CHRONOS ARCHIVE</p>
         <h1>Hứa Gia: <span>LIBERA-1899</span></h1>
       </div>
-      <p class="build">Vertical Slice 0.2</p>
+      <p class="build">Vertical Slice 0.3 // Gemini GM</p>
     </header>
 
     <main class="game-layout" aria-live="polite">
@@ -33,6 +35,37 @@
         <h2 id="scene-title">Đang mở hồ sơ…</h2>
         <div id="story-text" class="story-text"></div>
         <div id="choices" class="choices" aria-label="Các lựa chọn"></div>
+
+        <section id="ai-game-master" class="ai-game-master" aria-labelledby="ai-title">
+          <div class="ai-heading">
+            <div>
+              <p class="ai-eyebrow">GEMINI 3.6 FLASH // NHÁNH TỰ DO</p>
+              <h3 id="ai-title">AI quản trò</h3>
+            </div>
+            <span id="ai-status" class="ai-status" data-kind="idle">Đang khởi tạo</span>
+          </div>
+
+          <div id="ai-output" class="ai-output" hidden>
+            <div id="ai-narration" class="ai-narration"></div>
+            <div id="ai-dialogue" class="ai-dialogue"></div>
+            <div id="ai-suggestions" class="ai-suggestions" aria-label="Gợi ý từ quản trò"></div>
+          </div>
+
+          <label for="ai-action">Kai sẽ làm gì?</label>
+          <textarea
+            id="ai-action"
+            rows="4"
+            maxlength="600"
+            placeholder="Ví dụ: Tôi tắt đèn hành lang, quan sát phản ứng của người hầu rồi tìm đường vòng sang khu thuốc."
+          ></textarea>
+
+          <div class="ai-actions">
+            <button id="ai-submit" type="button">Thực hiện hành động tự do</button>
+            <button id="ai-clear" type="button">Xóa nhánh AI</button>
+          </div>
+
+          <p id="ai-note" class="ai-note">AI chỉ xử lý một nhánh phụ trong cảnh hiện tại. Các mốc canon, luật cứng và trạng thái chính vẫn do game kiểm soát.</p>
+        </section>
       </section>
 
       <aside class="intel-panel" aria-label="Tình trạng nhiệm vụ">
@@ -96,7 +129,7 @@
     </main>
 
     <footer>
-      <p>Phím tắt: <kbd>1</kbd>–<kbd>9</kbd> chọn phương án. Tiến trình tự động lưu trên thiết bị.</p>
+      <p>Phím tắt: <kbd>1</kbd>–<kbd>9</kbd> chọn phương án. <kbd>Ctrl</kbd> + <kbd>Enter</kbd> gửi hành động tự do. Tiến trình tự động lưu trên thiết bị.</p>
     </footer>
   </div>
 </body>
