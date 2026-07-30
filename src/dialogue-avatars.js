@@ -1,6 +1,11 @@
 (function () {
   "use strict";
 
+  const amyAvatar = {
+    src: "assets/avatars/amy.jpg",
+    alt: "Chân dung Amy"
+  };
+
   const characterAvatars = {
     Kai: {
       src: "assets/avatars/kai.svg",
@@ -13,7 +18,15 @@
     "Tiểu Lan": {
       src: "assets/avatars/tieu-lan.svg",
       alt: "Chân dung Hứa Tiểu Lan"
-    }
+    },
+    Amy: amyAvatar,
+    AMY: amyAvatar,
+    Delta: amyAvatar,
+    DELTA: amyAvatar,
+    "Amy/Delta": amyAvatar,
+    "Amy / Delta": amyAvatar,
+    "AMY/DELTA": amyAvatar,
+    "AMY / DELTA": amyAvatar
   };
 
   const styles = document.createElement("style");
