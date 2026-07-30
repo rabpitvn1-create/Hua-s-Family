@@ -5,6 +5,10 @@
     Kai: {
       src: "assets/avatars/kai.svg",
       alt: "Chân dung Kai"
+    },
+    Koei: {
+      src: "assets/avatars/koei.svg",
+      alt: "Chân dung Koei"
     }
   };
 
