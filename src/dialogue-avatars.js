@@ -197,8 +197,11 @@
 
   function decorateChoiceNumbers(root) {
     root.querySelectorAll(".choice-number").forEach((badge, index) => {
-      badge.textContent = toRoman(index + 1);
-      badge.setAttribute("aria-hidden", "true");
+      const roman = toRoman(index + 1);
+      if (badge.textContent !== roman) badge.textContent = roman;
+      if (badge.getAttribute("aria-hidden") !== "true") {
+        badge.setAttribute("aria-hidden", "true");
+      }
     });
   }
 
