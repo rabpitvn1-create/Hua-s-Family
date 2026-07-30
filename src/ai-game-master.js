@@ -1,11 +1,38 @@
-(function () {
-  "use strict";
+function cleanText(value, maxLength = 500) {
+  return typeof value === "string"
+    ? value.replace(/\u0000/g, "").replace(/\s+/g, " ").trim().slice(0, maxLength)
+    : "";
+}
 
-  const bridge = window.HUA_GAME_BRIDGE;
+function normalizeTurn(payload) {
+  const dialogue = (Array.isArray(payload?.dialogue) ? payload.dialogue : [])
+    .filter((line) => line && typeof line === "object")
+    .map((line) => ({
+      speaker: cleanText(line.speaker, 60),
+      text: cleanText(line.text, 600)
+    }))
+    .filter((line) => line.speaker && line.text)
+    .slice(0, 6);
+
+  const choices = (Array.isArray(payload?.choices) ? payload.choices : [])
+    .map((choice) => cleanText(choice, 240))
+    .filter(Boolean)
+    .slice(0, 3);
+
+  return {
+    narration: cleanText(payload?.narration, 7000),
+    dialogue,
+    choices,
+    effects: payload?.effects && typeof payload.effects === "object" ? payload.effects : {},
+    worldUpdates: payload?.worldUpdates && typeof payload.worldUpdates === "object" ? payload.worldUpdates : {},
+    summary: cleanText(payload?.summary, 360)
+  };
+}
+
+export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
   if (!bridge) return;
 
   const elements = {
-    panel: document.querySelector("#ai-game-master"),
     status: document.querySelector("#ai-status"),
     output: document.querySelector("#ai-output"),
     narration: document.querySelector("#ai-narration"),
@@ -17,95 +44,32 @@
     note: document.querySelector("#ai-note")
   };
 
-  if (Object.values(elements).some((element) => !element)) return;
+  if (!elements.status || !elements.action || !elements.submit || !elements.clear || !elements.note) return;
 
-  const STORAGE_KEY = "hua-family-gemini-branches-v1";
   const configuredEndpoint = typeof window.HUA_GEMINI_ENDPOINT === "string"
     ? window.HUA_GEMINI_ENDPOINT.trim()
     : "";
   const isGitHubPages = window.location.hostname.endsWith("github.io");
   const endpoint = configuredEndpoint || "/api/gemini-turn";
-
-  let activeSceneId = "";
-  let recentTurns = [];
   let busy = false;
-
-  function createStorage() {
-    try {
-      const probe = "__hua_ai_storage_probe__";
-      window.localStorage.setItem(probe, probe);
-      window.localStorage.removeItem(probe);
-      return window.localStorage;
-    } catch (error) {
-      console.warn("Không thể lưu nhánh AI trên thiết bị.", error);
-      return null;
-    }
-  }
-
-  const storage = createStorage();
-
-  function readBranches() {
-    if (!storage) return {};
-    try {
-      const raw = storage.getItem(STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : {};
-      return parsed && typeof parsed === "object" ? parsed : {};
-    } catch (error) {
-      console.warn("Bản lưu nhánh AI không hợp lệ.", error);
-      return {};
-    }
-  }
-
-  function saveCurrentBranch() {
-    if (!storage || !activeSceneId) return;
-    const branches = readBranches();
-    branches[activeSceneId] = recentTurns.slice(-6);
-    try {
-      storage.setItem(STORAGE_KEY, JSON.stringify(branches));
-    } catch (error) {
-      console.warn("Không thể lưu nhánh AI.", error);
-    }
-  }
-
-  function setBusy(value) {
-    busy = value;
-    elements.submit.disabled = value || (isGitHubPages && !configuredEndpoint);
-    elements.clear.disabled = value;
-    elements.action.disabled = value || (isGitHubPages && !configuredEndpoint);
-  }
 
   function setStatus(text, kind = "idle") {
     elements.status.textContent = text;
     elements.status.dataset.kind = kind;
   }
 
-  function clearRenderedTurn() {
-    elements.output.hidden = true;
-    elements.narration.replaceChildren();
-    elements.dialogue.replaceChildren();
-    elements.suggestions.replaceChildren();
-  }
-
-  function renderDialogue(dialogue) {
-    elements.dialogue.replaceChildren();
-    dialogue.forEach((line) => {
-      const row = document.createElement("p");
-      row.className = "ai-dialogue-line";
-
-      const speaker = document.createElement("strong");
-      speaker.textContent = line.speaker;
-
-      const text = document.createElement("span");
-      text.textContent = line.text;
-
-      row.append(speaker, text);
-      elements.dialogue.append(row);
-    });
+  function setBusy(value) {
+    busy = value;
+    const unavailable = isGitHubPages && !configuredEndpoint;
+    elements.submit.disabled = value || unavailable;
+    elements.action.disabled = value || unavailable;
+    elements.clear.disabled = value;
   }
 
   function renderSuggestions(choices) {
+    if (!elements.suggestions) return;
     elements.suggestions.replaceChildren();
-    choices.forEach((choice) => {
+    (Array.isArray(choices) ? choices : []).forEach((choice) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "ai-suggestion";
@@ -118,75 +82,21 @@
     });
   }
 
-  function normalizeTurn(payload) {
-    const dialogue = Array.isArray(payload?.dialogue)
-      ? payload.dialogue
-          .filter((line) => line && typeof line.speaker === "string" && typeof line.text === "string")
-          .slice(0, 4)
-          .map((line) => ({ speaker: line.speaker.slice(0, 60), text: line.text.slice(0, 500) }))
-      : [];
-
-    const choices = Array.isArray(payload?.choices)
-      ? payload.choices.filter((choice) => typeof choice === "string").slice(0, 3).map((choice) => choice.slice(0, 220))
-      : [];
-
-    return {
-      narration: typeof payload?.narration === "string" ? payload.narration.trim().slice(0, 5000) : "",
-      dialogue,
-      choices,
-      effects: payload?.effects && typeof payload.effects === "object" ? payload.effects : {},
-      summary: typeof payload?.summary === "string" ? payload.summary.trim().slice(0, 300) : ""
-    };
-  }
-
-  function renderTurn(turn) {
-    clearRenderedTurn();
-
-    turn.narration.split(/\n{2,}/).filter(Boolean).forEach((paragraph) => {
-      const p = document.createElement("p");
-      p.textContent = paragraph.trim();
-      elements.narration.append(p);
-    });
-
-    renderDialogue(turn.dialogue);
-    renderSuggestions(turn.choices);
+  function renderAppliedTurn(turn) {
+    if (!elements.output || !elements.narration || !elements.dialogue) return;
     elements.output.hidden = false;
-  }
+    elements.narration.replaceChildren();
+    elements.dialogue.replaceChildren();
 
-  function activateScene(sceneId) {
-    if (!sceneId || sceneId === activeSceneId) return;
-    activeSceneId = sceneId;
-
-    const branches = readBranches();
-    recentTurns = Array.isArray(branches[sceneId]) ? branches[sceneId].slice(-6) : [];
-    elements.action.value = "";
-
-    const lastTurn = recentTurns.at(-1)?.result;
-    if (lastTurn) {
-      renderTurn(normalizeTurn(lastTurn));
-      setStatus("Đã khôi phục nhánh AI", "ready");
-    } else {
-      clearRenderedTurn();
-      setStatus(isGitHubPages && !configuredEndpoint ? "Chưa có backend" : "Sẵn sàng", isGitHubPages && !configuredEndpoint ? "warning" : "ready");
-    }
-  }
-
-  function clearBranch() {
-    recentTurns = [];
-    if (storage && activeSceneId) {
-      const branches = readBranches();
-      delete branches[activeSceneId];
-      storage.setItem(STORAGE_KEY, JSON.stringify(branches));
-    }
-    elements.action.value = "";
-    clearRenderedTurn();
-    setStatus(isGitHubPages && !configuredEndpoint ? "Chưa có backend" : "Đã xóa nhánh AI", isGitHubPages && !configuredEndpoint ? "warning" : "ready");
+    const notice = document.createElement("p");
+    notice.textContent = turn.summary || "Lượt mới đã được ghi vào cốt truyện chính.";
+    elements.narration.append(notice);
+    renderSuggestions(turn.choices);
   }
 
   async function submitAction() {
     if (busy) return;
-
-    const action = elements.action.value.replace(/\s+/g, " ").trim();
+    const action = cleanText(elements.action.value, 600);
     if (!action) {
       setStatus("Hãy nhập hành động", "warning");
       elements.action.focus();
@@ -194,27 +104,21 @@
     }
 
     if (isGitHubPages && !configuredEndpoint) {
-      setStatus("GitHub Pages không chạy được API", "error");
-      elements.note.textContent = "Mã Gemini đã được tích hợp, nhưng bản GitHub Pages cần một backend riêng. Triển khai repository trên Vercel rồi thêm GEMINI_API_KEY vào Environment Variables.";
+      setStatus("GitHub Pages không có backend", "error");
+      elements.note.textContent = "Bản AI sandbox cần chạy trên Vercel hoặc một backend riêng để giữ API key an toàn.";
       return;
     }
 
     setBusy(true);
-    setStatus("Gemini đang xử lý…", "busy");
+    setStatus("Gemini đang phát triển cốt truyện…", "busy");
 
     try {
-      const snapshot = bridge.getSnapshot();
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action,
-          state: snapshot,
-          recentTurns: recentTurns.slice(-4).map((turn) => ({
-            action: turn.action,
-            summary: turn.result?.summary || "",
-            narration: turn.result?.narration || ""
-          }))
+          state: bridge.getSnapshot()
         })
       });
 
@@ -228,24 +132,24 @@
         throw new Error("Gemini trả về lượt chơi chưa đúng cấu trúc.");
       }
 
-      bridge.applyAiOutcome(turn.effects, turn.summary);
-      recentTurns.push({ action, result: turn });
-      recentTurns = recentTurns.slice(-6);
-      saveCurrentBranch();
-      renderTurn(turn);
+      bridge.applyAiTurn(turn, action);
+      renderAppliedTurn(turn);
       elements.action.value = "";
-      setStatus("Đã xử lý", "ready");
+      setStatus("Cốt truyện đã cập nhật", "ready");
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "Không thể gọi Gemini.";
-      setStatus(message, "error");
+      setStatus(error instanceof Error ? error.message : "Không thể gọi Gemini.", "error");
     } finally {
       setBusy(false);
     }
   }
 
   elements.submit.addEventListener("click", submitAction);
-  elements.clear.addEventListener("click", clearBranch);
+  elements.clear.addEventListener("click", () => {
+    elements.action.value = "";
+    elements.action.focus();
+    setStatus("Đã xóa ô nhập", "ready");
+  });
   elements.action.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
@@ -253,15 +157,20 @@
     }
   });
 
-  window.addEventListener("hua:scene-rendered", (event) => {
-    activateScene(event.detail?.sceneId);
+  window.addEventListener("hua:use-suggestion", (event) => {
+    const choice = cleanText(event.detail?.choice, 240);
+    if (!choice) return;
+    elements.action.value = choice;
+    elements.action.focus();
   });
 
-  const initialSnapshot = bridge.getSnapshot();
-  activateScene(initialSnapshot.sceneId);
-  setBusy(false);
+  window.addEventListener("hua:game-rendered", (event) => {
+    renderSuggestions(event.detail?.scene?.choices || []);
+  });
 
-  if (isGitHubPages && !configuredEndpoint) {
-    elements.note.textContent = "GitHub Pages chỉ phục vụ file tĩnh nên không đọc được GEMINI_API_KEY. Hãy triển khai cùng repository trên Vercel để bật quản trò AI an toàn.";
-  }
-}());
+  const snapshot = bridge.getSnapshot();
+  renderSuggestions(snapshot.scene?.choices || []);
+  setStatus(isGitHubPages && !configuredEndpoint ? "Chưa có backend" : "Sẵn sàng", isGitHubPages && !configuredEndpoint ? "warning" : "ready");
+  elements.note.textContent = "Gemini là đạo diễn cốt truyện chính. Mọi sự kiện phát sinh được ghi vào canon của chiến dịch, nhưng không được sửa canon thế giới.";
+  setBusy(false);
+}
