@@ -13,13 +13,13 @@ Vertical Slice 0.2 gồm:
 - Bốn phép kiểm chứng; người chơi phải hoàn thành tối thiểu ba.
 - Hệ thống cửa sổ tiếp xúc, quyền chủ động và nguy cơ phát tín hiệu.
 - Phản kế có tính toán của Tiểu Lan và mốc cưỡng chế không gây tử vong bắt buộc.
-- Avatar Kai trong các hộp thoại do Kai trực tiếp nói.
+- Avatar nhân vật trong hộp thoại; chạm avatar để mở ảnh chân dung lớn.
 - Lưu/tải bằng `localStorage`, gồm chuyển bản lưu 0.1 sang 0.2.
 - Điều khiển bằng chuột, bàn phím và bố cục responsive.
 
 ## Bản chơi thử trực tuyến
 
-- Bản phát hành có avatar Kai: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/ef24743451ff4ea5ba7ef8f7a0f9615c097a2b67/index.html
+- Bản phát hành có nút ảnh nhân vật: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/78eb5cfc234afa9ca29047885d4b83c3d04273da/index.html
 - GitHub Pages: https://rabpitvn1-create.github.io/Hua-s-Family/
 
 ## Chạy game cục bộ
