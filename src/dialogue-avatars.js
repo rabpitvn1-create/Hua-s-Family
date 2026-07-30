@@ -9,6 +9,10 @@
     Koei: {
       src: "assets/avatars/koei.svg",
       alt: "Chân dung Koei"
+    },
+    "Tiểu Lan": {
+      src: "assets/avatars/tieu-lan.svg",
+      alt: "Chân dung Hứa Tiểu Lan"
     }
   };
 
