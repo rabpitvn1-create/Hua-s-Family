@@ -23,18 +23,14 @@ const response = await fetch(
       generationConfig: {
         maxOutputTokens: 80,
         thinkingConfig: { thinkingLevel: "minimal" },
-        responseFormat: {
-          text: {
-            mimeType: "application/json",
-            schema: {
-              type: "object",
-              properties: {
-                ready: { type: "boolean" },
-                model: { type: "string" }
-              },
-              required: ["ready", "model"]
-            }
-          }
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            ready: { type: "boolean" },
+            model: { type: "string" }
+          },
+          required: ["ready", "model"]
         }
       }
     })
