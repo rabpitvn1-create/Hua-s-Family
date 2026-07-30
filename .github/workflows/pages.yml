@@ -23,15 +23,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Validate static game files
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate AI sandbox files
         shell: bash
         run: |
           set -euo pipefail
-          node --check src/story.js
-          node --check src/game.js
+          npm run check
           grep -q '^:root' styles.css
-          grep -q 'window.HUA_GAME_DATA' src/story.js
-          grep -q 'const data = window.HUA_GAME_DATA' src/game.js
+          grep -q '<script type="module" src="src/app.js"></script>' index.html
+          grep -q 'export const WORLD_CANON' src/world-canon.js
+          grep -q 'window.HUA_GAME_BRIDGE' src/game.js
+
+          if grep -Eq 'src/(story|encounters)\.js' index.html; then
+            echo 'index.html vẫn tham chiếu file truyện cố định đã bị loại bỏ.' >&2
+            exit 1
+          fi
 
   pages_state:
     name: Check Pages configuration
