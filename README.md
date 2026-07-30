@@ -1,6 +1,6 @@
 # Hứa Gia: LIBERA-1899
 
-Text game trình duyệt lấy bối cảnh Long Hải, Nam Kỳ năm 1899. Người chơi vào vai đặc vụ Elysium mang bí danh **Phantom**, được triển khai trong chiến dịch LIBERA-1899 để cứu Hứa Tiểu Lan và ngăn nghi lễ Giáng Mẫu.
+Text game trình duyệt lấy bối cảnh Long Hải, Nam Kỳ năm 1899. Người chơi vào vai **Kai**, đặc vụ Elysium mang mật danh **Phantom**, được triển khai trong chiến dịch LIBERA-1899 để cứu Hứa Tiểu Lan và ngăn nghi lễ Giáng Mẫu.
 
 ## Trạng thái hiện tại
 
@@ -29,14 +29,16 @@ Sau đó mở `http://localhost:8000`.
 2. Tiểu Lan tự nguyện tới Long Hải vì tin cha đưa mình đi dưỡng bệnh; cô chưa biết kế hoạch hiến tế.
 3. Mọi người làm công chính thức tại biệt thự mang Tử Mẫu Trùng, nhưng không mặc nhiên có cùng mức tội.
 4. Tiểu Lan không mang trùng vì được chuẩn bị làm vật chứa trực tiếp.
-5. Phantom phải cứu người, phá nghi lễ, bảo toàn dân thường, thu hồi công nghệ tương lai và tôn trọng quyền tự quyết của Tiểu Lan.
+5. Kai phải cứu người, phá nghi lễ, bảo toàn dân thường, thu hồi công nghệ tương lai và tôn trọng quyền tự quyết của Tiểu Lan.
 6. Phá Long Hải chỉ cắt một chân rết, không tiêu diệt toàn bộ Hứa Gia hoặc Quỷ Tử Mẫu.
 7. Amy/Delta và Koei không mặc nhiên hiện diện trong chiến dịch Long Hải.
 8. Không dùng lại các thiết lập cũ về Tây viện, giam Tiểu Lan tại Chợ Lớn, Huyết Tử Động, Mẫu Thai hoặc không gian chồng lấn.
 
-## Điểm canon cần khóa trước chương tiếp theo
+## Canon tên nhân vật
 
-Một số tài liệu nhân vật và bối cảnh vẫn gọi người giải cứu là **Cao Minh**, trong khi Codex Elysium mới dùng **Kai / Phantom**. Vertical Slice 0.1 chỉ dùng bí danh **Phantom** để không tự quyết định phần xung đột này.
+- Tên nhân vật chính: **Kai**.
+- Mật danh tác chiến: **Phantom**.
+- Tên **Cao Minh** thuộc tài liệu đã bỏ và không được sử dụng trong game.
 
 ## Cấu trúc
 
