@@ -1,217 +1,172 @@
-(function () {
-  "use strict";
+:root {
+  color-scheme: dark;
+  --bg: #0d0b0a;
+  --panel: #15110f;
+  --panel-2: #1d1714;
+  --ink: #eee5d7;
+  --muted: #a89d90;
+  --line: #3b302a;
+  --accent: #c7a36b;
+  --danger: #b65349;
+  --focus: #f3d7a2;
+  --shadow: 0 24px 60px rgb(0 0 0 / 35%);
+  font-family: Georgia, "Times New Roman", serif;
+}
 
-  const SAVE_KEY = "hua-family-libera-1899-v0.1";
-  const data = window.HUA_GAME_DATA;
+* { box-sizing: border-box; }
 
-  if (!data || !data.scenes || !data.initialState) {
-    document.body.textContent = "Không thể tải dữ liệu truyện.";
-    return;
-  }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 0%, rgb(112 61 36 / 14%), transparent 35rem),
+    linear-gradient(180deg, #120e0d, var(--bg));
+}
 
-  const elements = {
-    kicker: document.querySelector("#scene-kicker"),
-    progress: document.querySelector("#scene-progress"),
-    title: document.querySelector("#scene-title"),
-    story: document.querySelector("#story-text"),
-    choices: document.querySelector("#choices"),
-    alertMeter: document.querySelector("#alert-meter"),
-    alertValue: document.querySelector("#alert-value"),
-    ritualMeter: document.querySelector("#ritual-meter"),
-    ritualValue: document.querySelector("#ritual-value"),
-    civilianMeter: document.querySelector("#civilian-meter"),
-    civilianValue: document.querySelector("#civilian-value"),
-    evidenceValue: document.querySelector("#evidence-value"),
-    routeValue: document.querySelector("#route-value"),
-    log: document.querySelector("#log-list"),
-    save: document.querySelector("#save-button"),
-    load: document.querySelector("#load-button"),
-    restart: document.querySelector("#restart-button")
-  };
+button, meter { font: inherit; }
+button { color: inherit; }
 
-  let state = clone(data.initialState);
-  let enteredScenes = new Set();
+.shell {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 1.25rem;
+}
 
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
+.masthead {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
 
-  function clamp(value, min, max) {
-    return Math.min(max, Math.max(min, value));
-  }
+.eyebrow, .build, .scene-meta, footer, dt {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
 
-  function applyEffects(effects) {
-    if (!effects) return;
+.eyebrow, .build { margin: 0; color: var(--muted); font-size: .72rem; }
+h1 { margin: .3rem 0 0; font-size: clamp(1.8rem, 5vw, 3.6rem); font-weight: 500; }
+h1 span { color: var(--accent); }
 
-    if (effects.stats) {
-      Object.entries(effects.stats).forEach(([key, delta]) => {
-        const current = Number(state.stats[key] || 0);
-        const upper = key === "evidence" ? 99 : 100;
-        state.stats[key] = clamp(current + Number(delta), 0, upper);
-      });
-    }
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1rem;
+  padding: 1rem 0;
+}
 
-    if (effects.flags) {
-      Object.assign(state.flags, effects.flags);
-    }
+.story-panel, .intel-panel {
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, rgb(255 255 255 / 2%), transparent), var(--panel);
+  box-shadow: var(--shadow);
+}
 
-    if (effects.log) {
-      state.log.unshift(effects.log);
-      state.log = state.log.slice(0, 7);
-    }
-  }
+.story-panel { min-height: 680px; padding: clamp(1.25rem, 4vw, 3rem); }
+.intel-panel { padding: 1rem; background-color: var(--panel-2); }
+.intel-panel section + section { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
 
-  function enterScene(sceneId, effects) {
-    const nextScene = data.scenes[sceneId];
-    if (!nextScene) {
-      console.error(`Scene không tồn tại: ${sceneId}`);
-      return;
-    }
+.scene-meta { display: flex; justify-content: space-between; color: var(--accent); font-size: .72rem; }
+h2 { margin: 0 0 1rem; font-weight: 500; }
+.story-panel > h2 { margin-top: 1rem; font-size: clamp(1.7rem, 4vw, 2.7rem); }
+.intel-panel h2 { font-size: .85rem; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-transform: uppercase; letter-spacing: .08em; }
 
-    applyEffects(effects);
-    state.history.push(state.sceneId);
-    state.sceneId = sceneId;
+.story-text { max-width: 72ch; font-size: clamp(1.05rem, 2.2vw, 1.22rem); line-height: 1.75; }
+.story-text p { margin: 0 0 1.15rem; }
+.story-text .system { color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+.story-text .warning { padding-left: 1rem; border-left: 2px solid var(--danger); color: #e6c5bf; }
 
-    if (!enteredScenes.has(sceneId) && nextScene.onEnter) {
-      applyEffects(nextScene.onEnter);
-      enteredScenes.add(sceneId);
-    }
+.choices { display: grid; gap: .65rem; margin-top: 2rem; }
+.choice {
+  display: grid;
+  grid-template-columns: 2.1rem 1fr;
+  gap: .75rem;
+  width: 100%;
+  padding: .95rem 1rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #171210;
+  cursor: pointer;
+  transition: border-color .15s ease, transform .15s ease, background .15s ease;
+}
+.choice:hover { transform: translateY(-1px); border-color: var(--accent); background: #201814; }
+.choice:focus-visible, .controls button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.choice-number { color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.choice small { display: block; margin-top: .25rem; color: var(--muted); line-height: 1.4; }
 
-    autoSave();
-    render();
-  }
+.status-grid { margin: 0; }
+.status-grid div + div { margin-top: 1rem; }
+dt { color: var(--muted); font-size: .7rem; }
+dd { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .6rem; margin: .35rem 0 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .78rem; }
+meter { width: 100%; height: .55rem; accent-color: var(--accent); }
 
-  function renderParagraph(paragraph) {
-    const p = document.createElement("p");
-    if (typeof paragraph === "string") {
-      p.textContent = paragraph;
-    } else {
-      p.textContent = paragraph.text;
-      if (paragraph.className) p.className = paragraph.className;
-    }
-    return p;
-  }
+.facts p { margin: .5rem 0; color: var(--muted); line-height: 1.45; }
+.facts strong { color: var(--ink); }
+.mission-log ol { margin: 0; padding-left: 1.2rem; color: var(--muted); font-size: .86rem; line-height: 1.45; }
+.mission-log li + li { margin-top: .55rem; }
 
-  function render() {
-    const scene = data.scenes[state.sceneId];
-    if (!scene) return;
+.controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.controls button {
+  padding: .7rem .35rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  cursor: pointer;
+}
+.controls button:hover { border-color: var(--accent); }
 
-    elements.kicker.textContent = scene.kicker || "HỒ SƠ";
-    elements.progress.textContent = String(new Set(state.history.concat(state.sceneId)).size).padStart(2, "0");
-    elements.title.textContent = scene.title;
-    elements.story.replaceChildren(...scene.paragraphs.map(renderParagraph));
-    elements.choices.replaceChildren();
+footer { color: var(--muted); font-size: .67rem; }
+kbd { padding: .08rem .28rem; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); }
 
-    scene.choices.forEach((choice, index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "choice";
-      button.innerHTML = `<span class="choice-number">${index + 1}</span><span>${escapeHtml(choice.label)}${choice.hint ? `<small>${escapeHtml(choice.hint)}</small>` : ""}</span>`;
-      button.addEventListener("click", () => selectChoice(choice));
-      elements.choices.append(button);
-    });
+@media (max-width: 820px) {
+  .game-layout { grid-template-columns: 1fr; }
+  .story-panel { min-height: auto; }
+  .intel-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .intel-panel section + section { margin: 0; padding: 0; border: 0; }
+  .controls { grid-column: 1 / -1; }
+}
 
-    renderStatus();
-    document.title = `${scene.title} — Hứa Gia: LIBERA-1899`;
-  }
+@media (max-width: 560px) {
+  .shell { width: min(100% - 1rem, 1180px); padding-top: 1rem; }
+  .masthead { align-items: start; flex-direction: column; }
+  .story-panel { padding: 1.2rem; }
+  .intel-panel { grid-template-columns: 1fr; }
+  .controls { grid-column: auto; }
+}
 
-  function renderStatus() {
-    setMeter(elements.alertMeter, elements.alertValue, state.stats.alert);
-    setMeter(elements.ritualMeter, elements.ritualValue, state.stats.ritual);
-    setMeter(elements.civilianMeter, elements.civilianValue, state.stats.civilianSafety);
-    elements.evidenceValue.textContent = state.stats.evidence;
-    elements.routeValue.textContent = state.flags.route;
+.story-text .dialogue {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, auto) 1fr;
+  gap: .8rem;
+  padding: .8rem 1rem;
+  border-left: 2px solid var(--accent);
+  background: rgb(255 255 255 / 2%);
+}
 
-    elements.log.replaceChildren();
-    state.log.forEach((entry) => {
-      const li = document.createElement("li");
-      li.textContent = entry;
-      elements.log.append(li);
-    });
-  }
+.story-text .speaker {
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
 
-  function setMeter(meter, label, value) {
-    meter.value = value;
-    label.textContent = `${value}%`;
-  }
+.contact-facts {
+  margin-top: 1rem;
+  padding-top: .8rem;
+  border-top: 1px dashed var(--line);
+}
 
-  function selectChoice(choice) {
-    if (choice.action === "restart") {
-      restartGame();
-      return;
-    }
+.contact-facts p {
+  margin: .4rem 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
 
-    if (choice.next) {
-      enterScene(choice.next, choice.effects);
-    }
-  }
+.contact-facts strong { color: var(--ink); }
 
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function autoSave() {
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ state, enteredScenes: [...enteredScenes] }));
-    } catch (error) {
-      console.warn("Không thể tự động lưu.", error);
-    }
-  }
-
-  function saveGame() {
-    autoSave();
-    state.log.unshift("Tiến trình đã được lưu trên thiết bị.");
-    state.log = state.log.slice(0, 7);
-    renderStatus();
-  }
-
-  function loadGame() {
-    try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) {
-        state.log.unshift("Chưa có bản lưu trên thiết bị.");
-        renderStatus();
-        return;
-      }
-      const saved = JSON.parse(raw);
-      state = saved.state;
-      enteredScenes = new Set(saved.enteredScenes || []);
-      state.log.unshift("Đã tải bản lưu gần nhất.");
-      state.log = state.log.slice(0, 7);
-      render();
-    } catch (error) {
-      console.error(error);
-      state.log.unshift("Bản lưu không hợp lệ.");
-      renderStatus();
-    }
-  }
-
-  function restartGame() {
-    state = clone(data.initialState);
-    state.log.unshift("Dòng thời gian được khởi tạo lại.");
-    enteredScenes = new Set();
-    autoSave();
-    render();
-  }
-
-  elements.save.addEventListener("click", saveGame);
-  elements.load.addEventListener("click", loadGame);
-  elements.restart.addEventListener("click", restartGame);
-
-  document.addEventListener("keydown", (event) => {
-    if (event.altKey || event.ctrlKey || event.metaKey) return;
-    const index = Number(event.key) - 1;
-    const buttons = elements.choices.querySelectorAll("button");
-    if (Number.isInteger(index) && index >= 0 && buttons[index]) {
-      buttons[index].click();
-    }
-  });
-
-  loadGame();
-  render();
-}());
+@media (max-width: 560px) {
+  .story-text .dialogue { grid-template-columns: 1fr; gap: .35rem; }
+}

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#120e0d">
-  <meta name="description" content="Text game Hứa Gia: LIBERA-1899 — bản vertical slice đầu tiên.">
+  <meta name="description" content="Text game Hứa Gia: LIBERA-1899 — Vertical Slice 0.2, cuộc tiếp xúc đầu tiên giữa Kai và Hứa Tiểu Lan.">
   <title>Hứa Gia: LIBERA-1899</title>
   <link rel="stylesheet" href="styles.css">
   <script src="src/story.js" defer></script>
@@ -19,7 +19,7 @@
         <p class="eyebrow">ELYSIUM // CHRONOS ARCHIVE</p>
         <h1>Hứa Gia: <span>LIBERA-1899</span></h1>
       </div>
-      <p class="build">Vertical Slice 0.1</p>
+      <p class="build">Vertical Slice 0.2</p>
     </header>
 
     <main class="game-layout" aria-live="polite">
@@ -50,6 +50,28 @@
               <dd><meter id="civilian-meter" min="0" max="100" value="100"></meter><span id="civilian-value">100%</span></dd>
             </div>
           </dl>
+        </section>
+
+        <section id="contact-status" hidden>
+          <h2>Tiếp xúc</h2>
+          <dl class="status-grid">
+            <div>
+              <dt>Cửa sổ tiếp xúc</dt>
+              <dd><meter id="time-meter" min="0" max="100" value="100"></meter><span id="time-value">100%</span></dd>
+            </div>
+            <div>
+              <dt>Quyền chủ động</dt>
+              <dd><meter id="control-meter" min="0" max="100" value="50"></meter><span id="control-value">Giằng co</span></dd>
+            </div>
+            <div>
+              <dt>Nguy cơ phát tín hiệu</dt>
+              <dd><meter id="signal-meter" min="0" max="100" value="0"></meter><span id="signal-value">0%</span></dd>
+            </div>
+          </dl>
+          <div class="contact-facts">
+            <p><strong id="verification-value">0/3</strong> dữ kiện đã đối chiếu</p>
+            <p><strong id="contact-style-value">Chưa tiếp xúc</strong> cách tiếp cận</p>
+          </div>
         </section>
 
         <section class="facts">
