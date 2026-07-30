@@ -6,6 +6,11 @@ on:
     branches:
       - main
     paths:
+      - "index.html"
+      - "src/app.js"
+      - "src/world-canon.js"
+      - "src/game.js"
+      - "src/ai-game-master.js"
       - "api/gemini-turn.js"
       - "scripts/test-gemini.mjs"
       - "package.json"
