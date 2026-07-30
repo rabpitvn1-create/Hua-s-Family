@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#120e0d">
+  <meta name="description" content="Text game Hứa Gia: LIBERA-1899 — bản vertical slice đầu tiên.">
+  <title>Hứa Gia: LIBERA-1899</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="src/story.js" defer></script>
+  <script src="src/game.js" defer></script>
+</head>
+<body>
+  <noscript>Trò chơi cần JavaScript để vận hành.</noscript>
+
+  <div class="shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">ELYSIUM // CHRONOS ARCHIVE</p>
+        <h1>Hứa Gia: <span>LIBERA-1899</span></h1>
+      </div>
+      <p class="build">Vertical Slice 0.1</p>
+    </header>
+
+    <main class="game-layout" aria-live="polite">
+      <section class="story-panel" aria-labelledby="scene-title">
+        <div class="scene-meta">
+          <span id="scene-kicker">Hồ sơ nhiệm vụ</span>
+          <span id="scene-progress">01</span>
+        </div>
+        <h2 id="scene-title">Đang mở hồ sơ…</h2>
+        <div id="story-text" class="story-text"></div>
+        <div id="choices" class="choices" aria-label="Các lựa chọn"></div>
+      </section>
+
+      <aside class="intel-panel" aria-label="Tình trạng nhiệm vụ">
+        <section>
+          <h2>Tình trạng</h2>
+          <dl class="status-grid">
+            <div>
+              <dt>Báo động</dt>
+              <dd><meter id="alert-meter" min="0" max="100" value="0"></meter><span id="alert-value">0%</span></dd>
+            </div>
+            <div>
+              <dt>Áp lực nghi lễ</dt>
+              <dd><meter id="ritual-meter" min="0" max="100" value="10"></meter><span id="ritual-value">10%</span></dd>
+            </div>
+            <div>
+              <dt>An toàn dân sự</dt>
+              <dd><meter id="civilian-meter" min="0" max="100" value="100"></meter><span id="civilian-value">100%</span></dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="facts">
+          <h2>Thu thập</h2>
+          <p><strong id="evidence-value">0</strong> chứng cứ có thể thu hồi</p>
+          <p><strong id="route-value">Chưa chọn</strong> đường tiếp cận</p>
+        </section>
+
+        <section class="mission-log">
+          <h2>Nhật ký</h2>
+          <ol id="log-list"></ol>
+        </section>
+
+        <section class="controls" aria-label="Điều khiển trò chơi">
+          <button id="save-button" type="button">Lưu</button>
+          <button id="load-button" type="button">Tải</button>
+          <button id="restart-button" type="button">Chơi lại</button>
+        </section>
+      </aside>
+    </main>
+
+    <footer>
+      <p>Phím tắt: <kbd>1</kbd>–<kbd>9</kbd> chọn phương án. Tiến trình tự động lưu trên thiết bị.</p>
+    </footer>
+  </div>
+</body>
+</html>
