@@ -18,7 +18,8 @@ Vertical Slice 0.2 gồm:
 
 ## Bản chơi thử trực tuyến
 
-Chơi tại: https://rabpitvn1-create.github.io/Hua-s-Family/
+- Bản cố định Vertical Slice 0.2: https://cdn.jsdelivr.net/gh/rabpitvn1-create/Hua-s-Family@866fa6ebec23898e67c1d27e346634f8e94db5b9/index.html
+- GitHub Pages: https://rabpitvn1-create.github.io/Hua-s-Family/
 
 ## Chạy game cục bộ
 
