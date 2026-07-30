@@ -4,13 +4,13 @@ Text game trình duyệt lấy bối cảnh Long Hải, Nam Kỳ năm 1899. Ngư
 
 ## Trạng thái hiện tại
 
-Vertical Slice 0.2 gồm:
+Vertical Slice 0.3 gồm:
 
 - Hồ sơ nhiệm vụ và quy tắc giao chiến.
 - Ba đường thâm nhập có hậu quả khác nhau.
 - Chỉ số báo động, áp lực nghi lễ, an toàn dân sự và chứng cứ.
 - Cơ chế đụng độ tám loại vật chủ dị biến; loại xuất hiện phụ thuộc đường thâm nhập, báo động, áp lực nghi lễ và chứng cứ.
-- Tám ảnh encounter dùng WebP độ phân giải cao hơn, hiển thị theo đúng tỷ lệ và không còn bị ép vào khung `220×220`.
+- Tám ảnh encounter WebP độ phân giải cao, hiển thị theo đúng tỷ lệ.
 - Ba hướng xử lý ban đầu: phân loại, khống chế bằng xung điện hoặc dùng hỏa lực.
 - Kết quả đụng độ tác động tới báo động, tiến độ nghi lễ, an toàn dân sự và chứng cứ thu hồi.
 - Cuộc tiếp xúc đầu tiên giữa Kai và Hứa Tiểu Lan.
@@ -18,19 +18,17 @@ Vertical Slice 0.2 gồm:
 - Hệ thống cửa sổ tiếp xúc, quyền chủ động và nguy cơ phát tín hiệu.
 - Phản kế có tính toán của Tiểu Lan và mốc cưỡng chế không gây tử vong bắt buộc.
 - Avatar nhân vật hiển thị cạnh lời thoại.
-- Hiệu ứng chạm khi chọn phương án hội thoại: co nút, vòng sáng tại điểm chạm và đánh dấu lựa chọn trước khi chuyển cảnh.
-- Vạch vàng phân tách rõ phần nội dung với khu lựa chọn.
-- Huy hiệu lựa chọn dùng số La Mã trên nền vàng.
-- Đã sửa vòng lặp cập nhật số La Mã gây treo giao diện sau khi chọn.
 - Lưu/tải bằng `localStorage`, gồm chuyển bản lưu 0.1 sang 0.2.
-- Điều khiển bằng chuột, bàn phím và bố cục responsive.
+- **Nhánh hành động tự do do Gemini 3.6 Flash quản trò**, với ba gợi ý sau mỗi lượt.
+- AI chỉ đề xuất hậu quả trong giới hạn; game engine vẫn giữ canon, cảnh chính và trạng thái nhiệm vụ.
+- Backend serverless không để lộ `GEMINI_API_KEY` cho trình duyệt.
 
 ## Bản chơi thử trực tuyến
 
-- Bản phát hành có 8 loại quái vật và ảnh rõ: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/1180141081678a8d7031a2e9156984d6950352df/index.html
-- GitHub Pages: https://rabpitvn1-create.github.io/Hua-s-Family/
+- GitHub Pages, chỉ có phần game tĩnh: https://rabpitvn1-create.github.io/Hua-s-Family/
+- Nhánh AI cần triển khai repository trên Vercel hoặc một backend tương thích. Xem [`docs/GEMINI_SETUP.md`](docs/GEMINI_SETUP.md).
 
-## Chạy game cục bộ
+## Chạy game tĩnh cục bộ
 
 Mở trực tiếp `index.html`, hoặc chạy web server cục bộ:
 
@@ -38,7 +36,17 @@ Mở trực tiếp `index.html`, hoặc chạy web server cục bộ:
 python -m http.server 8000
 ```
 
-Sau đó mở `http://localhost:8000`.
+Sau đó mở `http://localhost:8000`. Phần truyện cố định hoạt động; AI không hoạt động vì không có backend.
+
+## Chạy đầy đủ với Gemini
+
+```bash
+npm install -g vercel
+cp .env.example .env.local
+vercel dev
+```
+
+Điền `GEMINI_API_KEY` trong `.env.local`, không commit file này. Hướng dẫn đầy đủ ở [`docs/GEMINI_SETUP.md`](docs/GEMINI_SETUP.md).
 
 ## Nguyên tắc canon đang áp dụng
 
@@ -56,21 +64,34 @@ Sau đó mở `http://localhost:8000`.
 12. `Kai` là tên nhân vật; `Phantom` chỉ là mật danh. `Cao Minh` thuộc tài liệu đã bỏ.
 13. Vật chủ thức tỉnh phải được phân loại theo hành vi, vai trò và khả năng cứu; mang ký sinh không tự động biến mọi người thành mục tiêu tiêu diệt.
 14. Mỗi biến đổi cơ thể phải có chức năng chiến thuật và hậu quả, không chỉ dùng như trang trí kinh dị.
+15. AI không được tự sửa mốc canon, tạo năng lực mới hoặc biến hành động của người chơi thành chiến thắng vô điều kiện.
 
 ## Cấu trúc
 
 ```text
 .
+├── .github/workflows/
+│   └── gemini-smoke-test.yml
+├── api/
+│   └── gemini-turn.js
 ├── assets/
 │   ├── avatars/
 │   └── encounters/
-├── index.html
-├── styles.css
+├── docs/
+│   ├── CANON_IMPLEMENTATION.md
+│   └── GEMINI_SETUP.md
+├── scripts/
+│   └── test-gemini.mjs
 ├── src/
+│   ├── ai-game-master.js
 │   ├── dialogue-avatars.js
 │   ├── encounters.js
 │   ├── game.js
 │   └── story.js
-└── docs/
-    └── CANON_IMPLEMENTATION.md
+├── .env.example
+├── ai-styles.css
+├── index.html
+├── package.json
+├── styles.css
+└── vercel.json
 ```
