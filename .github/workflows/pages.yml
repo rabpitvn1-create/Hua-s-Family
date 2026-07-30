@@ -33,7 +33,7 @@ jobs:
           grep -q 'window.HUA_GAME_DATA' src/story.js
           grep -q 'const data = window.HUA_GAME_DATA' src/game.js
 
-  pages-state:
+  pages_state:
     name: Check Pages configuration
     needs: validate
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
             --header 'Accept: application/vnd.github+json' \
             --header "Authorization: Bearer ${GH_TOKEN}" \
             --header 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages")"
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages" || true)"
 
           if [ "$status" = "200" ]; then
             build_type="$(python -c 'import json; print(json.load(open("pages.json", encoding="utf-8")).get("build_type", ""))')"
@@ -65,22 +65,20 @@ jobs:
             exit 0
           fi
 
+          echo 'ready=false' >> "$GITHUB_OUTPUT"
           if [ "$status" = "404" ]; then
-            echo 'ready=false' >> "$GITHUB_OUTPUT"
             echo '::notice title=GitHub Pages chưa được bật::Vào Settings > Pages > Build and deployment > Source và chọn GitHub Actions.'
-            exit 0
+          else
+            echo "::warning title=Không đọc được cấu hình Pages::HTTP ${status}. Deployment được bỏ qua để không làm hỏng toàn bộ workflow."
+            cat pages.json 2>/dev/null || true
           fi
-
-          cat pages.json
-          echo "Không thể kiểm tra GitHub Pages; HTTP ${status}." >&2
-          exit 1
 
   deploy:
     name: Deploy playtest
     needs:
       - validate
-      - pages-state
-    if: needs.pages-state.outputs.ready == 'true'
+      - pages_state
+    if: needs.pages_state.outputs.ready == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -101,12 +99,12 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  pages-not-enabled:
+  pages_not_enabled:
     name: Pages setup required
     needs:
       - validate
-      - pages-state
-    if: needs.pages-state.outputs.ready != 'true'
+      - pages_state
+    if: needs.pages_state.outputs.ready != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Explain required repository setting
