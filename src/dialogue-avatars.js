@@ -29,7 +29,7 @@
       overflow: visible;
     }
 
-    .story-text .dialogue-avatar-button {
+    .story-text .dialogue-avatar {
       position: absolute;
       z-index: 1;
       width: var(--avatar-size);
@@ -37,7 +37,8 @@
       left: calc(-1 * (var(--avatar-size) - var(--avatar-overlap)));
       top: 50%;
       transform: translateY(-50%);
-      padding: 0;
+      object-fit: cover;
+      object-position: 50% 36%;
       border: 1px solid var(--accent);
       border-radius: .4rem;
       background: #0b0d12;
@@ -45,100 +46,70 @@
         0 0 0 3px rgb(13 11 10 / 88%),
         0 12px 28px rgb(0 0 0 / 45%),
         0 0 24px rgb(70 118 210 / 18%);
-      cursor: zoom-in;
-      overflow: hidden;
-      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
-    }
-
-    .story-text .dialogue-avatar-button:hover {
-      transform: translateY(-50%) scale(1.035);
-      border-color: var(--focus);
-    }
-
-    .story-text .dialogue-avatar-button:focus-visible {
-      outline: 2px solid var(--focus);
-      outline-offset: 4px;
-    }
-
-    .story-text .dialogue-avatar {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: 50% 36%;
       pointer-events: none;
     }
 
-    .avatar-lightbox[hidden] {
-      display: none;
-    }
-
-    .avatar-lightbox {
-      position: fixed;
-      z-index: 1000;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 1rem;
-      background: rgb(0 0 0 / 82%);
-      backdrop-filter: blur(8px);
-    }
-
-    .avatar-lightbox-card {
+    .choice {
       position: relative;
-      width: min(88vw, 36rem);
-      margin: 0;
-      padding: .75rem;
-      border: 1px solid var(--accent);
-      border-radius: .65rem;
-      background: #0b0d12;
-      box-shadow: 0 24px 80px rgb(0 0 0 / 70%);
-    }
-
-    .avatar-lightbox-image {
-      display: block;
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      object-position: 50% 36%;
-      border-radius: .35rem;
-    }
-
-    .avatar-lightbox-caption {
-      padding: .7rem .25rem .15rem;
-      color: var(--accent);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: .78rem;
-      letter-spacing: .08em;
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    .avatar-lightbox-close {
-      position: absolute;
-      z-index: 1;
-      top: .35rem;
-      right: .35rem;
-      width: 2.5rem;
-      height: 2.5rem;
-      padding: 0;
-      border: 1px solid rgb(255 255 255 / 35%);
-      border-radius: 999px;
-      color: white;
-      background: rgb(0 0 0 / 72%);
-      font-size: 1.45rem;
-      line-height: 1;
-      cursor: pointer;
-    }
-
-    .avatar-lightbox-close:focus-visible {
-      outline: 2px solid var(--focus);
-      outline-offset: 3px;
-    }
-
-    html.avatar-lightbox-open,
-    html.avatar-lightbox-open body {
+      isolation: isolate;
       overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .choice > *:not(.choice-ripple) {
+      position: relative;
+      z-index: 1;
+    }
+
+    .choice:active {
+      transform: translateY(1px) scale(.985);
+      border-color: var(--focus);
+      background: #291f19;
+    }
+
+    .choice.is-selected {
+      transform: scale(.985);
+      border-color: var(--focus);
+      background:
+        linear-gradient(90deg, rgb(199 163 107 / 18%), transparent 72%),
+        #211814;
+      box-shadow:
+        0 0 0 2px rgb(243 215 162 / 12%),
+        inset 0 0 24px rgb(199 163 107 / 8%);
+    }
+
+    .choice.is-selected .choice-number {
+      color: var(--focus);
+      transform: scale(1.15);
+    }
+
+    .choice.is-disabled {
+      opacity: .48;
+      pointer-events: none;
+    }
+
+    .choice-ripple {
+      position: absolute;
+      z-index: 0;
+      width: 1px;
+      height: 1px;
+      border-radius: 999px;
+      background: rgb(243 215 162 / 34%);
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0);
+      animation: choice-ripple .42s ease-out forwards;
+    }
+
+    @keyframes choice-ripple {
+      0% {
+        opacity: .9;
+        transform: translate(-50%, -50%) scale(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+      }
     }
 
     @media (max-width: 560px) {
@@ -148,67 +119,20 @@
         min-height: calc(var(--avatar-size) - .6rem);
         padding-left: calc(.8rem + var(--avatar-overlap));
       }
-
-      .avatar-lightbox-card {
-        width: min(94vw, 32rem);
-      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .story-text .dialogue-avatar-button {
-        transition: none;
+      .choice,
+      .choice-number {
+        transition: none !important;
+      }
+
+      .choice-ripple {
+        display: none;
       }
     }
   `;
   document.head.append(styles);
-
-  const lightbox = document.createElement("div");
-  lightbox.className = "avatar-lightbox";
-  lightbox.hidden = true;
-  lightbox.setAttribute("role", "dialog");
-  lightbox.setAttribute("aria-modal", "true");
-  lightbox.setAttribute("aria-label", "Ảnh nhân vật");
-  lightbox.innerHTML = `
-    <figure class="avatar-lightbox-card">
-      <button class="avatar-lightbox-close" type="button" aria-label="Đóng ảnh">×</button>
-      <img class="avatar-lightbox-image" alt="">
-      <figcaption class="avatar-lightbox-caption"></figcaption>
-    </figure>
-  `;
-  document.body.append(lightbox);
-
-  const lightboxImage = lightbox.querySelector(".avatar-lightbox-image");
-  const lightboxCaption = lightbox.querySelector(".avatar-lightbox-caption");
-  const lightboxClose = lightbox.querySelector(".avatar-lightbox-close");
-  let lastTrigger = null;
-
-  function openLightbox(avatar, speakerName, trigger) {
-    lastTrigger = trigger;
-    lightboxImage.src = avatar.src;
-    lightboxImage.alt = avatar.alt;
-    lightboxCaption.textContent = speakerName;
-    lightbox.hidden = false;
-    document.documentElement.classList.add("avatar-lightbox-open");
-    lightboxClose.focus();
-  }
-
-  function closeLightbox() {
-    if (lightbox.hidden) return;
-    lightbox.hidden = true;
-    lightboxImage.removeAttribute("src");
-    document.documentElement.classList.remove("avatar-lightbox-open");
-    if (lastTrigger && document.contains(lastTrigger)) lastTrigger.focus();
-    lastTrigger = null;
-  }
-
-  lightboxClose.addEventListener("click", closeLightbox);
-  lightbox.addEventListener("click", (event) => {
-    if (event.target === lightbox) closeLightbox();
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !lightbox.hidden) closeLightbox();
-  });
 
   function decorateDialogue(dialogue) {
     if (dialogue.dataset.avatarChecked === "true") return;
@@ -220,31 +144,74 @@
 
     if (!avatar) return;
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "dialogue-avatar-button";
-    button.setAttribute("aria-label", `Mở ảnh ${speakerName}`);
-    button.title = `Chạm để xem ảnh ${speakerName}`;
-
     const image = document.createElement("img");
     image.className = "dialogue-avatar";
     image.src = avatar.src;
-    image.alt = "";
+    image.alt = avatar.alt;
     image.width = 96;
     image.height = 96;
     image.decoding = "async";
     image.loading = "lazy";
 
-    button.append(image);
-    button.addEventListener("click", () => openLightbox(avatar, speakerName, button));
-
     dialogue.classList.add("has-avatar");
-    dialogue.prepend(button);
+    dialogue.prepend(image);
   }
 
   function decorateAll(root) {
     root.querySelectorAll(".dialogue").forEach(decorateDialogue);
   }
+
+  function addChoiceRipple(button, event) {
+    const rect = button.getBoundingClientRect();
+    const useCenter = !event.clientX && !event.clientY;
+    const x = useCenter ? rect.width / 2 : event.clientX - rect.left;
+    const y = useCenter ? rect.height / 2 : event.clientY - rect.top;
+    const size = Math.ceil(Math.hypot(rect.width, rect.height) * 2);
+
+    const ripple = document.createElement("span");
+    ripple.className = "choice-ripple";
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    ripple.style.width = `${size}px`;
+    ripple.style.height = `${size}px`;
+    ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+    button.append(ripple);
+  }
+
+  let choiceFeedbackLocked = false;
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest(".choice");
+    if (!button) return;
+
+    if (button.dataset.choiceFeedbackPass === "true") {
+      delete button.dataset.choiceFeedbackPass;
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    if (choiceFeedbackLocked) return;
+    choiceFeedbackLocked = true;
+
+    addChoiceRipple(button, event);
+    button.classList.add("is-selected");
+    button.setAttribute("aria-pressed", "true");
+
+    button.parentElement.querySelectorAll(".choice").forEach((item) => {
+      if (item !== button) item.classList.add("is-disabled");
+    });
+
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180;
+    window.setTimeout(() => {
+      button.dataset.choiceFeedbackPass = "true";
+      button.click();
+      window.setTimeout(() => {
+        choiceFeedbackLocked = false;
+      }, 0);
+    }, delay);
+  }, true);
 
   const story = document.querySelector("#story-text");
   if (!story) return;
