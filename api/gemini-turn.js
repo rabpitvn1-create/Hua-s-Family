@@ -1,5 +1,12 @@
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`;
+const PRIMARY_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const FALLBACK_MODELS = (process.env.GEMINI_FALLBACK_MODELS || "gemini-3.5-flash-lite")
+  .split(",")
+  .map((model) => model.trim())
+  .filter(Boolean);
+const MODEL_CANDIDATES = [...new Set([PRIMARY_MODEL, ...FALLBACK_MODELS])];
+const RETRIES_PER_MODEL = Math.min(3, Math.max(1, Number(process.env.GEMINI_RETRY_ATTEMPTS) || 2));
+const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+const SWITCHABLE_STATUSES = new Set([404, ...RETRYABLE_STATUSES]);
 
 const SYSTEM_INSTRUCTION = `
 Bạn là AI quản trò phụ trợ cho text game Hứa Gia: LIBERA-1899. Bạn chỉ xử lý một nhánh hành động tự do trong cảnh hiện tại rồi trả quyền điều khiển về game chính.
@@ -225,6 +232,90 @@ function setCors(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
+function sleep(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function retryDelay(attempt) {
+  const exponential = 650 * (2 ** attempt);
+  const jitter = Math.floor(Math.random() * 300);
+  return exponential + jitter;
+}
+
+function buildRequestBody(model, prompt) {
+  return {
+    systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      maxOutputTokens: 1400,
+      thinkingConfig: {
+        thinkingLevel: model.includes("lite") ? "minimal" : "low"
+      },
+      responseMimeType: "application/json",
+      responseJsonSchema: RESPONSE_SCHEMA
+    }
+  };
+}
+
+async function requestModel(model, prompt) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+  let lastFailure = null;
+
+  for (let attempt = 0; attempt < RETRIES_PER_MODEL; attempt += 1) {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": process.env.GEMINI_API_KEY
+        },
+        body: JSON.stringify(buildRequestBody(model, prompt))
+      });
+
+      const raw = await response.text();
+      let payload = {};
+      try {
+        payload = raw ? JSON.parse(raw) : {};
+      } catch {
+        payload = {};
+      }
+
+      if (response.ok) {
+        return { ok: true, model, payload };
+      }
+
+      lastFailure = {
+        ok: false,
+        model,
+        status: response.status,
+        message: payload?.error?.message || `Gemini API trả lỗi ${response.status}.`
+      };
+
+      if (!RETRYABLE_STATUSES.has(response.status) || attempt === RETRIES_PER_MODEL - 1) {
+        return lastFailure;
+      }
+    } catch (error) {
+      lastFailure = {
+        ok: false,
+        model,
+        status: 0,
+        message: error instanceof Error ? error.message : "Không thể kết nối Gemini API."
+      };
+
+      if (attempt === RETRIES_PER_MODEL - 1) return lastFailure;
+    }
+
+    await sleep(retryDelay(attempt));
+  }
+
+  return lastFailure || {
+    ok: false,
+    model,
+    status: 0,
+    message: "Không thể kết nối Gemini API."
+  };
+}
+
 export default async function handler(req, res) {
   setCors(req, res);
 
@@ -246,48 +337,49 @@ export default async function handler(req, res) {
     recentAiBranch: normalizeRecentTurns(body.recentTurns)
   });
 
-  try {
-    const apiResponse = await fetch(GEMINI_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": process.env.GEMINI_API_KEY
-      },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: 1400,
-          thinkingConfig: { thinkingLevel: "low" },
-          responseMimeType: "application/json",
-          responseJsonSchema: RESPONSE_SCHEMA
+  let lastFailure = null;
+
+  for (const model of MODEL_CANDIDATES) {
+    const attempt = await requestModel(model, prompt);
+
+    if (attempt.ok) {
+      try {
+        const outputText = extractText(attempt.payload);
+        if (!outputText) {
+          const reason = attempt.payload?.candidates?.[0]?.finishReason
+            || attempt.payload?.promptFeedback?.blockReason
+            || "không rõ";
+          throw new Error(`Gemini không trả về nội dung hợp lệ (${reason}).`);
         }
-      })
-    });
 
-    const raw = await apiResponse.text();
-    let payload = {};
-    try {
-      payload = raw ? JSON.parse(raw) : {};
-    } catch {
-      payload = {};
+        const result = normalizeResult(JSON.parse(outputText));
+        res.setHeader("X-Gemini-Model", model);
+        return res.status(200).json(result);
+      } catch (error) {
+        lastFailure = {
+          ok: false,
+          model,
+          status: 502,
+          message: error instanceof Error ? error.message : "Gemini trả về dữ liệu không hợp lệ."
+        };
+        console.warn(`Gemini model ${model} trả dữ liệu lỗi; chuyển model nếu còn.`, lastFailure.message);
+        continue;
+      }
     }
 
-    if (!apiResponse.ok) {
-      const message = payload?.error?.message || `Gemini API trả lỗi ${apiResponse.status}.`;
-      return res.status(apiResponse.status === 429 ? 429 : 502).json({ error: message });
-    }
+    lastFailure = attempt;
+    console.warn(`Gemini model ${model} thất bại với trạng thái ${attempt.status}.`, attempt.message);
 
-    const outputText = extractText(payload);
-    if (!outputText) {
-      const reason = payload?.candidates?.[0]?.finishReason || payload?.promptFeedback?.blockReason || "không rõ";
-      return res.status(502).json({ error: `Gemini không trả về nội dung hợp lệ (${reason}).` });
+    if (attempt.status !== 0 && !SWITCHABLE_STATUSES.has(attempt.status)) {
+      const status = [400, 401, 403].includes(attempt.status) ? attempt.status : 502;
+      return res.status(status).json({ error: attempt.message });
     }
-
-    return res.status(200).json(normalizeResult(JSON.parse(outputText)));
-  } catch (error) {
-    console.error("Gemini request failed:", error);
-    const message = error instanceof Error ? error.message : "Không thể kết nối Gemini API.";
-    return res.status(502).json({ error: message });
   }
+
+  const status = lastFailure?.status === 429 ? 429 : 503;
+  const error = status === 429
+    ? "Gemini đang giới hạn số lượt gọi. Hệ thống đã tự thử lại và đổi model; hãy thử lại sau ít phút."
+    : "Gemini đang quá tải. Hệ thống đã tự thử lại model chính và model dự phòng; hãy thử lại sau ít phút.";
+
+  return res.status(status).json({ error });
 }
