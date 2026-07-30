@@ -1,6 +1,6 @@
 # Bật AI quản trò Gemini
 
-Repository đã có sẵn giao diện nhập hành động tự do và backend `api/gemini-turn.js` dùng model ổn định `gemini-3.6-flash`.
+Repository đã có sẵn giao diện nhập hành động tự do và backend `api/gemini-turn.js`. Model chính là `gemini-3.6-flash`; khi Google trả lỗi quá tải tạm thời, backend tự thử lại rồi chuyển sang `gemini-3.5-flash-lite`.
 
 ## Điều quan trọng về GitHub Pages
 
@@ -21,7 +21,7 @@ Value: khóa Gemini của bạn
 ```
 
 5. Bấm **Deploy**.
-6. Mở URL Vercel vừa tạo. Giao diện game và `/api/gemini-turn` sẽ chạy cùng tên miền nên không cần cấu hình thêm.
+6. Mở URL Vercel vừa tạo. Giao diện game và `/api/gemini-turn` chạy cùng tên miền nên không cần cấu hình thêm.
 
 Không dán API key vào `index.html`, `src/*.js`, README hoặc bất kỳ file nào được commit.
 
@@ -50,13 +50,24 @@ Mở địa chỉ Vercel CLI hiển thị, thường là `http://localhost:3000`
 
 ## Kiểm tra secret trong GitHub
 
-Repository có workflow thủ công `.github/workflows/gemini-smoke-test.yml`.
+Repository có workflow `.github/workflows/gemini-smoke-test.yml`.
 
 1. Mở tab **Actions**.
 2. Chọn **Kiểm tra Gemini API**.
 3. Chọn **Run workflow**.
 
-Workflow chỉ báo key/model có gọi được hay không. Nó không biến GitHub Pages thành backend.
+Workflow tự thử model chính và model dự phòng. Nó chỉ kiểm tra API key/model; không biến GitHub Pages thành backend.
+
+## Xử lý khi Gemini quá tải
+
+Lỗi `503 UNAVAILABLE` hoặc thông báo “This model is currently experiencing high demand” là lỗi công suất tạm thời từ Gemini, không phải lỗi API key hay Vercel.
+
+Backend hiện xử lý theo thứ tự:
+
+1. Gọi `gemini-3.6-flash`.
+2. Nếu gặp lỗi tạm thời như `408`, `429` hoặc `5xx`, chờ một khoảng ngắn có jitter rồi thử lại.
+3. Nếu model chính vẫn không đáp ứng, chuyển sang `gemini-3.5-flash-lite`.
+4. Chỉ báo lỗi cho người chơi sau khi cả model chính và model dự phòng đều thất bại.
 
 ## Cách AI được giới hạn
 
@@ -70,7 +81,9 @@ Workflow chỉ báo key/model có gọi được hay không. Nó không biến G
 
 ```text
 GEMINI_MODEL=gemini-3.6-flash
+GEMINI_FALLBACK_MODELS=gemini-3.5-flash-lite
+GEMINI_RETRY_ATTEMPTS=2
 ALLOWED_ORIGINS=https://rabpitvn1-create.github.io,http://localhost:3000
 ```
 
-`ALLOWED_ORIGINS` chỉ cần khi giao diện và backend nằm ở hai tên miền khác nhau.
+`GEMINI_FALLBACK_MODELS` nhận nhiều model cách nhau bằng dấu phẩy. `GEMINI_RETRY_ATTEMPTS` được giới hạn từ 1 đến 3 lần cho mỗi model. `ALLOWED_ORIGINS` chỉ cần khi giao diện và backend nằm ở hai tên miền khác nhau.
