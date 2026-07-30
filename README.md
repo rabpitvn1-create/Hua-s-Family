@@ -9,6 +9,9 @@ Vertical Slice 0.2 gồm:
 - Hồ sơ nhiệm vụ và quy tắc giao chiến.
 - Ba đường thâm nhập có hậu quả khác nhau.
 - Chỉ số báo động, áp lực nghi lễ, an toàn dân sự và chứng cứ.
+- Cơ chế đụng độ bốn loại vật chủ dị biến; loại xuất hiện phụ thuộc đường thâm nhập và mức báo động.
+- Ba hướng xử lý ban đầu: phân loại, khống chế bằng xung điện hoặc dùng hỏa lực.
+- Kết quả đụng độ tác động tới báo động, tiến độ nghi lễ, an toàn dân sự và chứng cứ thu hồi.
 - Cuộc tiếp xúc đầu tiên giữa Kai và Hứa Tiểu Lan.
 - Bốn phép kiểm chứng; người chơi phải hoàn thành tối thiểu ba.
 - Hệ thống cửa sổ tiếp xúc, quyền chủ động và nguy cơ phát tín hiệu.
@@ -23,7 +26,7 @@ Vertical Slice 0.2 gồm:
 
 ## Bản chơi thử trực tuyến
 
-- Bản phát hành ổn định có vạch vàng và số La Mã: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/c5cee1aa17b480dc250ff58662cfb20d8f844e10/index.html
+- Bản phát hành có cơ chế đụng độ quái vật: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/3f165b850fbc4e698f5b193aa03e4e50523ef40b/index.html
 - GitHub Pages: https://rabpitvn1-create.github.io/Hua-s-Family/
 
 ## Chạy game cục bộ
@@ -50,17 +53,20 @@ Sau đó mở `http://localhost:8000`.
 10. Amy/Delta và Koei không mặc nhiên hiện diện trong chiến dịch Long Hải.
 11. Không dùng lại các thiết lập cũ về Tây viện, giam Tiểu Lan tại Chợ Lớn, Huyết Tử Động, Mẫu Thai hoặc không gian chồng lấn.
 12. `Kai` là tên nhân vật; `Phantom` chỉ là mật danh. `Cao Minh` thuộc tài liệu đã bỏ.
+13. Vật chủ thức tỉnh phải được phân loại theo hành vi, vai trò và khả năng cứu; mang ký sinh không tự động biến mọi người thành mục tiêu tiêu diệt.
 
 ## Cấu trúc
 
 ```text
 .
 ├── assets/
-│   └── avatars/
+│   ├── avatars/
+│   └── encounters/
 ├── index.html
 ├── styles.css
 ├── src/
 │   ├── dialogue-avatars.js
+│   ├── encounters.js
 │   ├── game.js
 │   └── story.js
 └── docs/
