@@ -135,3 +135,38 @@ kbd { padding: .08rem .28rem; border: 1px solid var(--line); border-radius: 3px;
   .intel-panel { grid-template-columns: 1fr; }
   .controls { grid-column: auto; }
 }
+
+.story-text .dialogue {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, auto) 1fr;
+  gap: .8rem;
+  padding: .8rem 1rem;
+  border-left: 2px solid var(--accent);
+  background: rgb(255 255 255 / 2%);
+}
+
+.story-text .speaker {
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.contact-facts {
+  margin-top: 1rem;
+  padding-top: .8rem;
+  border-top: 1px dashed var(--line);
+}
+
+.contact-facts p {
+  margin: .4rem 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.contact-facts strong { color: var(--ink); }
+
+@media (max-width: 560px) {
+  .story-text .dialogue { grid-template-columns: 1fr; gap: .35rem; }
+}
