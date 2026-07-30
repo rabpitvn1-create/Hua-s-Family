@@ -13,13 +13,14 @@ Vertical Slice 0.2 gồm:
 - Bốn phép kiểm chứng; người chơi phải hoàn thành tối thiểu ba.
 - Hệ thống cửa sổ tiếp xúc, quyền chủ động và nguy cơ phát tín hiệu.
 - Phản kế có tính toán của Tiểu Lan và mốc cưỡng chế không gây tử vong bắt buộc.
-- Avatar nhân vật trong hộp thoại; chạm avatar để mở ảnh chân dung lớn.
+- Avatar nhân vật hiển thị cạnh lời thoại.
+- Hiệu ứng chạm khi chọn phương án hội thoại: co nút, vòng sáng tại điểm chạm và đánh dấu lựa chọn trước khi chuyển cảnh.
 - Lưu/tải bằng `localStorage`, gồm chuyển bản lưu 0.1 sang 0.2.
 - Điều khiển bằng chuột, bàn phím và bố cục responsive.
 
 ## Bản chơi thử trực tuyến
 
-- Bản phát hành có nút ảnh nhân vật: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/78eb5cfc234afa9ca29047885d4b83c3d04273da/index.html
+- Bản phát hành có hiệu ứng chạm hội thoại: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/79f0de26de64a993fb9b9d6863b6d008c917ed3c/index.html
 - GitHub Pages: https://rabpitvn1-create.github.io/Hua-s-Family/
 
 ## Chạy game cục bộ
@@ -53,7 +54,6 @@ Sau đó mở `http://localhost:8000`.
 .
 ├── assets/
 │   └── avatars/
-│       └── kai.svg
 ├── index.html
 ├── styles.css
 ├── src/
