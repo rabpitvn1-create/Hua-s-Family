@@ -17,12 +17,13 @@ Vertical Slice 0.2 gồm:
 - Hiệu ứng chạm khi chọn phương án hội thoại: co nút, vòng sáng tại điểm chạm và đánh dấu lựa chọn trước khi chuyển cảnh.
 - Vạch vàng phân tách rõ phần nội dung với khu lựa chọn.
 - Huy hiệu lựa chọn dùng số La Mã trên nền vàng.
+- Đã sửa vòng lặp cập nhật số La Mã gây treo giao diện sau khi chọn.
 - Lưu/tải bằng `localStorage`, gồm chuyển bản lưu 0.1 sang 0.2.
 - Điều khiển bằng chuột, bàn phím và bố cục responsive.
 
 ## Bản chơi thử trực tuyến
 
-- Bản phát hành có vạch vàng và số La Mã: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/6ca99434ffe43013343cc84f5890d27b7d8b6162/index.html
+- Bản phát hành ổn định có vạch vàng và số La Mã: https://rawcdn.githack.com/rabpitvn1-create/Hua-s-Family/c5cee1aa17b480dc250ff58662cfb20d8f844e10/index.html
 - GitHub Pages: https://rabpitvn1-create.github.io/Hua-s-Family/
 
 ## Chạy game cục bộ
