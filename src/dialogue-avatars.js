@@ -93,8 +93,10 @@
     }
 
     .choice.is-selected .choice-number {
-      color: var(--focus);
+      color: #21170d;
+      background: var(--focus);
       transform: scale(1.15);
+      box-shadow: 0 0 16px rgb(243 215 162 / 38%);
     }
 
     .choice.is-disabled {
@@ -174,6 +176,32 @@
     root.querySelectorAll(".dialogue").forEach(decorateDialogue);
   }
 
+  function toRoman(value) {
+    const map = [
+      [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+      [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+      [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
+    ];
+    let number = Math.max(1, Math.floor(Number(value) || 1));
+    let result = "";
+
+    map.forEach(([unit, symbol]) => {
+      while (number >= unit) {
+        result += symbol;
+        number -= unit;
+      }
+    });
+
+    return result;
+  }
+
+  function decorateChoiceNumbers(root) {
+    root.querySelectorAll(".choice-number").forEach((badge, index) => {
+      badge.textContent = toRoman(index + 1);
+      badge.setAttribute("aria-hidden", "true");
+    });
+  }
+
   function addChoiceRipple(button, event) {
     const rect = button.getBoundingClientRect();
     const useCenter = !event.clientX && !event.clientY;
@@ -227,10 +255,15 @@
   }, true);
 
   const story = document.querySelector("#story-text");
-  if (!story) return;
+  const choices = document.querySelector("#choices");
+  if (!story || !choices) return;
 
   decorateAll(story);
+  decorateChoiceNumbers(choices);
 
-  const observer = new MutationObserver(() => decorateAll(story));
-  observer.observe(story, { childList: true, subtree: true });
+  const storyObserver = new MutationObserver(() => decorateAll(story));
+  storyObserver.observe(story, { childList: true, subtree: true });
+
+  const choiceObserver = new MutationObserver(() => decorateChoiceNumbers(choices));
+  choiceObserver.observe(choices, { childList: true, subtree: true });
 }());
