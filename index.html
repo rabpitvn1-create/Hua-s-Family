@@ -4,15 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#120e0d">
-  <meta name="description" content="Text game Hứa Gia: LIBERA-1899 — Vertical Slice 0.3, tích hợp quản trò Gemini cho hành động tự do.">
+  <meta name="description" content="Hứa Gia: LIBERA-1899 — text game AI sandbox phát triển cốt truyện theo canon thế giới.">
   <title>Hứa Gia: LIBERA-1899</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="ai-styles.css">
-  <script src="src/story.js" defer></script>
-  <script src="src/encounters.js" defer></script>
-  <script src="src/game.js" defer></script>
-  <script src="src/dialogue-avatars.js" defer></script>
-  <script src="src/ai-game-master.js" defer></script>
+  <script type="module" src="src/app.js"></script>
 </head>
 <body>
   <noscript>Trò chơi cần JavaScript để vận hành.</noscript>
@@ -20,27 +16,27 @@
   <div class="shell">
     <header class="masthead">
       <div>
-        <p class="eyebrow">ELYSIUM // CHRONOS ARCHIVE</p>
+        <p class="eyebrow">ELYSIUM // CHRONOS SANDBOX</p>
         <h1>Hứa Gia: <span>LIBERA-1899</span></h1>
       </div>
-      <p class="build">Vertical Slice 0.3 // Gemini GM</p>
+      <p class="build">AI Sandbox 1.0 // Canon World</p>
     </header>
 
     <main class="game-layout" aria-live="polite">
       <section class="story-panel" aria-labelledby="scene-title">
         <div class="scene-meta">
-          <span id="scene-kicker">Hồ sơ nhiệm vụ</span>
-          <span id="scene-progress">01</span>
+          <span id="scene-kicker">LONG HẢI // 1899</span>
+          <span id="scene-progress">00</span>
         </div>
-        <h2 id="scene-title">Đang mở hồ sơ…</h2>
+        <h2 id="scene-title">Dòng thời gian chưa được viết</h2>
         <div id="story-text" class="story-text"></div>
-        <div id="choices" class="choices" aria-label="Các lựa chọn"></div>
+        <div id="choices" class="choices" aria-label="Các hướng hành động gợi ý"></div>
 
         <section id="ai-game-master" class="ai-game-master" aria-labelledby="ai-title">
           <div class="ai-heading">
             <div>
-              <p class="ai-eyebrow">GEMINI 3.6 FLASH // NHÁNH TỰ DO</p>
-              <h3 id="ai-title">AI quản trò</h3>
+              <p class="ai-eyebrow">GEMINI // ĐẠO DIỄN CHIẾN DỊCH</p>
+              <h3 id="ai-title">Hành động của Kai</h3>
             </div>
             <span id="ai-status" class="ai-status" data-kind="idle">Đang khởi tạo</span>
           </div>
@@ -48,27 +44,27 @@
           <div id="ai-output" class="ai-output" hidden>
             <div id="ai-narration" class="ai-narration"></div>
             <div id="ai-dialogue" class="ai-dialogue"></div>
-            <div id="ai-suggestions" class="ai-suggestions" aria-label="Gợi ý từ quản trò"></div>
+            <div id="ai-suggestions" class="ai-suggestions" aria-label="Gợi ý từ đạo diễn"></div>
           </div>
 
-          <label for="ai-action">Kai sẽ làm gì?</label>
+          <label for="ai-action">Nhập bất kỳ hành động hợp lý nào</label>
           <textarea
             id="ai-action"
             rows="4"
             maxlength="600"
-            placeholder="Ví dụ: Tôi tắt đèn hành lang, quan sát phản ứng của người hầu rồi tìm đường vòng sang khu thuốc."
+            placeholder="Ví dụ: Kai rời đường chính, quan sát người ra vào khu nhà Hứa Gia và tìm một người dân địa phương có thể nói chuyện kín đáo."
           ></textarea>
 
           <div class="ai-actions">
-            <button id="ai-submit" type="button">Thực hiện hành động tự do</button>
-            <button id="ai-clear" type="button">Xóa nhánh AI</button>
+            <button id="ai-submit" type="button">Tiếp tục cốt truyện</button>
+            <button id="ai-clear" type="button">Xóa ô nhập</button>
           </div>
 
-          <p id="ai-note" class="ai-note">AI chỉ xử lý một nhánh phụ trong cảnh hiện tại. Các mốc canon, luật cứng và trạng thái chính vẫn do game kiểm soát.</p>
+          <p id="ai-note" class="ai-note">Gemini phát triển cốt truyện chính từ hành động của người chơi. Canon thế giới vẫn là giới hạn bất biến.</p>
         </section>
       </section>
 
-      <aside class="intel-panel" aria-label="Tình trạng nhiệm vụ">
+      <aside class="intel-panel" aria-label="Tình trạng chiến dịch">
         <section>
           <h2>Tình trạng</h2>
           <dl class="status-grid">
@@ -87,49 +83,59 @@
           </dl>
         </section>
 
-        <section id="contact-status" hidden>
-          <h2>Tiếp xúc</h2>
+        <section id="contact-status">
+          <h2>Chiến dịch</h2>
           <dl class="status-grid">
             <div>
-              <dt>Cửa sổ tiếp xúc</dt>
+              <dt>Ổn định nhiệm vụ</dt>
               <dd><meter id="time-meter" min="0" max="100" value="100"></meter><span id="time-value">100%</span></dd>
             </div>
             <div>
               <dt>Quyền chủ động</dt>
-              <dd><meter id="control-meter" min="0" max="100" value="50"></meter><span id="control-value">Giằng co</span></dd>
+              <dd><meter id="control-meter" min="0" max="100" value="50"></meter><span id="control-value">50%</span></dd>
             </div>
             <div>
-              <dt>Nguy cơ phát tín hiệu</dt>
+              <dt>Dấu vết thời gian</dt>
               <dd><meter id="signal-meter" min="0" max="100" value="0"></meter><span id="signal-value">0%</span></dd>
             </div>
           </dl>
           <div class="contact-facts">
-            <p><strong id="verification-value">0/3</strong> dữ kiện đã đối chiếu</p>
-            <p><strong id="contact-style-value">Chưa tiếp xúc</strong> cách tiếp cận</p>
+            <p>Lượt <strong id="verification-value">0</strong></p>
+            <p><strong id="contact-style-value">Long Hải, Nam Kỳ</strong></p>
           </div>
         </section>
 
         <section class="facts">
-          <h2>Thu thập</h2>
-          <p><strong id="evidence-value">0</strong> chứng cứ có thể thu hồi</p>
-          <p><strong id="route-value">Chưa chọn</strong> đường tiếp cận</p>
+          <h2>Hiện trường</h2>
+          <p><strong id="evidence-value">0</strong> chứng cứ</p>
+          <p><strong id="route-value">Long Hải, Nam Kỳ</strong></p>
         </section>
 
         <section class="mission-log">
-          <h2>Nhật ký</h2>
+          <h2>Đầu mối đang mở</h2>
+          <ol id="threads-list"></ol>
+        </section>
+
+        <section class="mission-log">
+          <h2>Vật phẩm</h2>
+          <ol id="inventory-list"></ol>
+        </section>
+
+        <section class="mission-log">
+          <h2>Nhật ký chiến dịch</h2>
           <ol id="log-list"></ol>
         </section>
 
         <section class="controls" aria-label="Điều khiển trò chơi">
           <button id="save-button" type="button">Lưu</button>
           <button id="load-button" type="button">Tải</button>
-          <button id="restart-button" type="button">Chơi lại</button>
+          <button id="restart-button" type="button">Chiến dịch mới</button>
         </section>
       </aside>
     </main>
 
     <footer>
-      <p>Phím tắt: <kbd>1</kbd>–<kbd>9</kbd> chọn phương án. <kbd>Ctrl</kbd> + <kbd>Enter</kbd> gửi hành động tự do. Tiến trình tự động lưu trên thiết bị.</p>
+      <p>Chọn một gợi ý hoặc tự nhập hành động. <kbd>Ctrl</kbd> + <kbd>Enter</kbd> gửi lượt. Cốt truyện phát sinh được lưu trên thiết bị.</p>
     </footer>
   </div>
 </body>
