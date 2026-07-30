@@ -16,7 +16,11 @@ Vertical Slice 0.2 gồm:
 - Lưu/tải bằng `localStorage`, gồm chuyển bản lưu 0.1 sang 0.2.
 - Điều khiển bằng chuột, bàn phím và bố cục responsive.
 
-## Chạy game
+## Bản chơi thử trực tuyến
+
+Chơi tại: https://rabpitvn1-create.github.io/Hua-s-Family/
+
+## Chạy game cục bộ
 
 Mở trực tiếp `index.html`, hoặc chạy web server cục bộ:
 
