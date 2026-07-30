@@ -28,7 +28,7 @@
       paragraphs: [
         "Màn hình kính đen hiện lên giữa phòng chuẩn bị của Chronos. Năm đích: 1899. Địa điểm: biệt thự Hứa Gia tại Long Hải, Nam Kỳ.",
         "Hứa Tiểu Lan đã tự nguyện tới đó vì tin cha đưa mình đi dưỡng bệnh. Elysium xác nhận cơ sở đang chuẩn bị cô làm vật chứa trực tiếp cho một thực thể cấp Quỷ Vương.",
-        "Nhiệm vụ của Phantom không chỉ là đưa cô ra ngoài. Anh phải ngăn nghi lễ, phân biệt người bị ép với tín đồ tự nguyện, giữ kín công nghệ tương lai và không biến người được cứu thành tài sản của một tổ chức khác."
+        "Nhiệm vụ của Kai, mật danh Phantom, không chỉ là đưa cô ra ngoài. Anh phải ngăn nghi lễ, phân biệt người bị ép với tín đồ tự nguyện, giữ kín công nghệ tương lai và không biến người được cứu thành tài sản của một tổ chức khác."
       ],
       choices: [
         { label: "Đọc tình báo đã xác nhận", hint: "Khóa các dữ kiện không được phép suy diễn.", next: "intel" },
@@ -57,7 +57,7 @@
       kicker: "VENATORES // QUY TẮC GIAO CHIẾN",
       title: "Mang ký sinh không đồng nghĩa có cùng tội",
       paragraphs: [
-        "Không khai hỏa chỉ vì cảm biến phát hiện Tử Mẫu Trùng. Phantom phải đánh giá hành vi, vai trò và nguy cơ trực tiếp.",
+        "Không khai hỏa chỉ vì cảm biến phát hiện Tử Mẫu Trùng. Kai phải đánh giá hành vi, vai trò và nguy cơ trực tiếp.",
         "Ưu tiên vô hiệu hóa chính xác, không gây chết người khi tình thế cho phép. Không bỏ mặc một mối đe dọa đang có khả năng giết dân thường chỉ để giữ vẻ nhân đạo.",
         "Mọi mảnh vỡ, đạn, thiết bị, máu mô cải biến và dữ liệu thế kỷ 29 phải được thu hồi trước khi cổng đóng."
       ],
@@ -73,7 +73,7 @@
       kicker: "CHRONOS // CỬA SỔ MỞ",
       title: "Long Hải, năm 1899",
       paragraphs: [
-        "Không khí mặn đi qua lớp lọc của giáp. Sau lưng Phantom, khe sáng của thế kỷ 29 co lại thành một đường mảnh rồi biến mất.",
+        "Không khí mặn đi qua lớp lọc của giáp. Sau lưng Kai, khe sáng của thế kỷ 29 co lại thành một đường mảnh rồi biến mất.",
         "Phía trước là một cộng đồng ven biển vẫn còn thức theo con nước. Xa hơn, biệt thự Hứa Gia sáng đèn như một nơi dưỡng bệnh: sân phơi thuốc, nhà phụ, bếp và những lối vận chuyển nối về phía biển.",
         "Cảm biến nhận được nhiều tín hiệu sinh học đồng dạng trong khuôn viên. Chưa tín hiệu nào tự nó cho phép anh kết luận ai đáng chết."
       ],
@@ -104,7 +104,7 @@
       kicker: "THÂM NHẬP // BỜ ĐÁ",
       title: "Căn nhà không cần phô ra song sắt",
       paragraphs: [
-        "Từ sườn đá, Phantom dựng lại nhịp di chuyển của khu nhà. Người làm mang thuốc, nước nóng và băng vải theo những tuyến đều đặn. Họ không giống một đội quân chờ lệnh; họ giống các bộ phận đã quen làm việc trong cùng một cơ thể.",
+        "Từ sườn đá, Kai dựng lại nhịp di chuyển của khu nhà. Người làm mang thuốc, nước nóng và băng vải theo những tuyến đều đặn. Họ không giống một đội quân chờ lệnh; họ giống các bộ phận đã quen làm việc trong cùng một cơ thể.",
         "Một nhịp cộng hưởng chạy qua nhiều tín hiệu sinh học cùng lúc. Những người ở ba dãy nhà đổi hướng gần như đồng thời, nhưng không ai tỏ ra hoảng sợ.",
         "Quan sát đủ lâu giúp anh đánh dấu đường báo động mà không cần chạm vào bất kỳ ai. Cái giá là nghi lễ tiếp tục tiến gần."
       ],
@@ -121,7 +121,7 @@
       paragraphs: [
         "Một xe đẩy từ nhà kho dừng dưới mái che. Trên đó có thuốc, băng vải sạch và những hũ men được niêm kín. Người đẩy xe trao một thẻ gỗ cho thủ kho rồi nhận lại đúng số đồ đã định.",
         "Không có gì trong cảnh ấy giống một cuộc bắt cóc. Sự chăm sóc là thật. Chính vì vậy, hệ thống giữ Tiểu Lan ở đây càng khó bị nhìn thấy từ bên trong.",
-        "Phantom có thể đánh dấu sổ giao nhận để thu hồi sau, hoặc tiếp tục bám theo xe tới khu nhà chính."
+        "Kai có thể đánh dấu sổ giao nhận để thu hồi sau, hoặc tiếp tục bám theo xe tới khu nhà chính."
       ],
       choices: [
         { label: "Đánh dấu vị trí sổ giao nhận", hint: "Tăng chứng cứ, mất thêm thời gian.", next: "perimeter", effects: { stats: { evidence: 2, ritual: 8, alert: 4 }, flags: { recordsMarked: true }, log: "Đã đánh dấu hồ sơ vận chuyển để thu hồi." } },
@@ -133,7 +133,7 @@
       kicker: "THÂM NHẬP // VƯỜN THUỐC",
       title: "Người làm vườn quay đầu cùng một lúc",
       paragraphs: [
-        "Phantom vượt qua hàng cây thấp trước khi người làm vườn đầu tiên kịp nhìn rõ. Một người khác ở gần bếp nghiêng đầu. Rồi một người thứ ba đặt thúng xuống.",
+        "Kai vượt qua hàng cây thấp trước khi người làm vườn đầu tiên kịp nhìn rõ. Một người khác ở gần bếp nghiêng đầu. Rồi một người thứ ba đặt thúng xuống.",
         "Phản ứng lan qua khuôn viên không bằng tiếng gọi. Mạng liên kết đã nhận thấy một sai lệch nhưng chưa xác định được nó là gì.",
         "Anh còn một nhịp để chọn: biến mất khỏi đường nhìn hoặc khống chế người gần nhất trước khi tín hiệu được xác nhận."
       ],
@@ -148,7 +148,7 @@
       title: "Cơ sở bắt đầu thức tỉnh",
       paragraphs: [
         "Các cửa phụ khép lại theo thứ tự. Người trong nhà không chạy loạn; họ đổi vị trí để khóa hành lang, che người ngoài và giữ khu nhà chính tách khỏi sân.",
-        "Phantom xác định được hai ưu tiên cạnh tranh: tiếp tục cắt mạng để giảm số người phải đối đầu, hoặc dùng cửa sổ hiện tại tiến thẳng về phía tín hiệu sinh học không mang ký sinh.",
+        "Kai xác định được hai ưu tiên cạnh tranh: tiếp tục cắt mạng để giảm số người phải đối đầu, hoặc dùng cửa sổ hiện tại tiến thẳng về phía tín hiệu sinh học không mang ký sinh.",
         "Tín hiệu ấy ở sâu trong khu nhà chính. Hứa Tiểu Lan vẫn còn sống."
       ],
       choices: [
@@ -173,7 +173,7 @@
       paragraphs: [
         "Mùi thuốc sắc phủ kín hành lang. Băng vải được gấp ngay ngắn bên một chậu nước còn ấm. Không có dấu hiệu ai bỏ mặc người bệnh.",
         "Phía sau, mạng ký sinh điều chỉnh đội hình. Phía trước, một tiếng ho bị nén lại sau cánh cửa không khóa.",
-        "Elysium đã cảnh báo: Tiểu Lan đủ thông minh để chống lại một cuộc giải cứu, nhưng chưa có dữ kiện để hiểu nó là giải cứu. Phantom kiểm tra góc súng, lối rút và khoảng cách tới cửa."
+        "Elysium đã cảnh báo: Tiểu Lan đủ thông minh để chống lại một cuộc giải cứu, nhưng chưa có dữ kiện để hiểu nó là giải cứu. Kai kiểm tra góc súng, lối rút và khoảng cách tới cửa."
       ],
       onEnter: { stats: { ritual: 8 }, log: "Đã tới khu nhà chính." },
       choices: [
@@ -187,7 +187,7 @@
       title: "Người ở bên kia cửa đã biết",
       paragraphs: [
         "Bên trong, tiếng chén sứ chạm mặt bàn rất khẽ. Không có tiếng gọi người. Không có bước chân chạy khỏi phòng.",
-        "Phantom nhìn thấy bóng người dịch khỏi vị trí dễ quan sát nhất. Tiểu Lan đang giảm chuyển động, kiểm tra lối ra và chờ kẻ ngoài cửa tự để lộ mục đích.",
+        "Kai nhìn thấy bóng người dịch khỏi vị trí dễ quan sát nhất. Tiểu Lan đang giảm chuyển động, kiểm tra lối ra và chờ kẻ ngoài cửa tự để lộ mục đích.",
         "Cửa sổ Chronos vẫn mở ở điểm rút. Mạng Hứa Gia đang khép lại phía sau. Cuộc giải cứu thật sự bắt đầu từ lựa chọn tiếp theo — cách một người có sức mạnh chứng minh rằng mình không đến để sở hữu người khác."
       ],
       choices: [
@@ -201,7 +201,7 @@
       paragraphs: [
         "Bản chơi thử đầu tiên kết thúc trước cuộc đối thoại bắt buộc với Hứa Tiểu Lan.",
         "Những lựa chọn vừa thực hiện đã tạo trạng thái mở đầu cho chương tiếp theo: mức báo động, áp lực nghi lễ, an toàn dân sự, chứng cứ và đường tiếp cận.",
-        "Mọi nhánh tiếp theo phải hội tụ về các mốc canon đã khóa: Tiểu Lan không tin Phantom, chống lại việc bị đưa đi, và chiến thắng tại Long Hải chỉ là cắt một chân rết của Hứa Gia."
+        "Mọi nhánh tiếp theo phải hội tụ về các mốc canon đã khóa: Tiểu Lan không tin Kai, chống lại việc bị đưa đi, và chiến thắng tại Long Hải chỉ là cắt một chân rết của Hứa Gia."
       ],
       choices: [
         { label: "Chơi lại từ đầu", action: "restart" },
