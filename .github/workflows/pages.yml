@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - deploy-status.json
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -16,7 +18,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate static game files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/story.js
+          node --check src/game.js
+          grep -q '^:root' styles.css
+          grep -q 'window.HUA_GAME_DATA' src/story.js
+          grep -q 'const data = window.HUA_GAME_DATA' src/game.js
+
   deploy:
+    needs: validate
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -36,3 +55,21 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Record successful deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > deploy-status.json <<EOF
+          {
+            "status": "deployed",
+            "source_commit": "${GITHUB_SHA}",
+            "deployed_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "page_url": "${{ steps.deployment.outputs.page_url }}"
+          }
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deploy-status.json
+          git commit -m "chore: record successful Pages deployment" || exit 0
+          git push
