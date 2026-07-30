@@ -7,43 +7,107 @@
   const encounters = {
     manylimb: {
       name: "Kẻ Khóa Hành Lang",
-      image: "assets/encounters/ke-khoa-hanh-lang.svg",
+      image: "assets/encounters/ke-khoa-hanh-lang.webp",
+      width: 448,
+      height: 375,
       cssClass: "encounter-manylimb",
       threat: "RẤT CAO",
       recoverability: "CHƯA XÁC ĐỊNH",
+      entryStats: { alert: 6, ritual: 3 },
       role: "Các chi phụ neo vào tường và khung cửa, biến cơ thể vật chủ thành một chốt sống khóa đường tiến.",
       intro: "Một người hầu nam cong lưng giữa hành lang. Những chi phụ mọc từ vai và sống lưng bám vào hai phía khung cửa, giữ cả đoạn nhà như một chiếc bẫy đang khép.",
       scan: "Nhịp co của các chi phụ đi trước chuyển động có ý thức nửa nhịp. Vật chủ vẫn còn phản xạ né đau, nhưng mạng ký sinh đang giành quyền điều khiển vận động."
     },
     bloom: {
       name: "Mẫu Hầu Trổ Nhánh",
-      image: "assets/encounters/mau-hau-tro-nhanh.svg",
+      image: "assets/encounters/mau-hau-tro-nhanh.webp",
+      width: 448,
+      height: 370,
       cssClass: "encounter-bloom",
       threat: "CAO",
       recoverability: "CÓ THỂ",
+      entryStats: { alert: 3, ritual: 3 },
       role: "Chi trước kéo dài để giữ, quấn và kéo người bệnh trở lại khu chăm sóc.",
       intro: "Người chăm bệnh bước ra từ bóng tối với một cánh tay đã kéo dài thành nhiều nhánh móc. Miệng bà vẫn lặp lại lời dỗ dành, trong khi cơ thể tự tìm cách giữ Kai ở lại hành lang.",
       scan: "Giọng nói còn mang nhịp thở và phản ứng sợ hãi của con người. Khối ký sinh ở vai đang ép cánh tay thực hiện một vai trò chăm sóc bị biến thành cưỡng giữ."
     },
     reacher: {
       name: "Phu Gác Kéo Dài",
-      image: "assets/encounters/phu-gac-keo-dai.svg",
+      image: "assets/encounters/phu-gac-keo-dai.webp",
+      width: 448,
+      height: 386,
       cssClass: "encounter-reacher",
       threat: "TRUNG BÌNH–CAO",
       recoverability: "CÓ THỂ",
+      entryStats: { alert: 4, ritual: 2 },
       role: "Một cánh tay tăng chiều dài để khóa khoảng cách, kéo chuông báo và giữ cửa.",
       intro: "Người gác già nghiêng người cạnh cầu thang. Cánh tay phải đã kéo dài quá tỷ lệ cơ thể, quét sát nền để tìm cổ chân và dây báo động cùng lúc.",
       scan: "Khối ký sinh tập trung ở vai phải; phần còn lại của cơ thể chưa biến đổi hoàn toàn. Ông vẫn cố rút tay về mỗi khi nó chạm gần ngọn đèn nóng."
     },
     carrier: {
       name: "Người Gánh Ổ Trùng",
-      image: "assets/encounters/nguoi-ganh-o-trung.svg",
+      image: "assets/encounters/nguoi-ganh-o-trung.webp",
+      width: 448,
+      height: 448,
       cssClass: "encounter-carrier",
       threat: "CAO",
       recoverability: "THẤP",
+      entryStats: { alert: 5, ritual: 4 },
       role: "Khối ký sinh trên lưng phân phối chi phụ để chặn đường và truyền tín hiệu về mạng.",
       intro: "Một người đàn bà gánh giỏ vận chuyển khựng lại giữa lối đi. Khối u trên lưng mở ra thành nhiều chi phụ, còn bàn tay bà vẫn giữ quai giỏ như đang cố hoàn thành công việc cuối cùng.",
       scan: "Cơ thể vật chủ còn phản ứng với tên gọi và vật quen thuộc, nhưng ổ trùng trên lưng đã trở thành nút truyền tín hiệu độc lập. Mọi tổn thương mạnh có thể lan báo động qua toàn khu nhà."
+    },
+    crawler: {
+      name: "Kẻ Bò Sát Nền",
+      image: "assets/encounters/ke-bo-sat-nen.webp",
+      width: 384,
+      height: 307,
+      cssClass: "encounter-crawler",
+      threat: "RẤT CAO",
+      recoverability: "THẤP",
+      entryStats: { alert: 8, ritual: 2 },
+      role: "Cơ thể hạ thấp trọng tâm, các chi trước bám nền và bứt tốc để cắt chân, khóa đường lùi trong hành lang hẹp.",
+      intro: "Một gia nhân nam bò sát nền gạch như thể đầu gối và vai đã đổi chức năng. Những nhánh trùng sau lưng quét trần thấp, còn các ngón tay kéo dài dò từng khe giữa chân bàn.",
+      scan: "Phản xạ nhìn và né vẫn còn, nhưng các chi trước đang vận động theo một nhịp săn mồi độc lập. Tổn thương ở cột sống cho thấy mỗi lần tăng tốc đều tiếp tục phá cơ thể vật chủ."
+    },
+    offset: {
+      name: "Vật Mẫu Lệch Trục",
+      image: "assets/encounters/vat-mau-lech-truc.webp",
+      width: 384,
+      height: 307,
+      cssClass: "encounter-offset",
+      threat: "CAO",
+      recoverability: "CÓ THỂ",
+      entryStats: { alert: 7, ritual: 3 },
+      role: "Một bên vai và cánh tay bị trùng bọc dày, tạo lực phá cửa và ép mục tiêu lệch khỏi tuyến di chuyển đã chọn.",
+      intro: "Người phu kho đứng lệch hẳn sang một bên, như toàn bộ khối lượng cơ thể đã bị kéo về vai phải. Cánh tay biến dạng cào qua cửa gỗ, để lại những rãnh sâu thay cho một tiếng gọi báo động.",
+      scan: "Sự biến đổi tập trung ở một nửa cơ thể. Tay còn lại vẫn cố chống lên khung cửa để giữ thăng bằng, cho thấy vật chủ chưa mất hoàn toàn khả năng chống lại mệnh lệnh vận động."
+    },
+    mist: {
+      name: "Mê Khí Nội Tạng",
+      image: "assets/encounters/me-khi-noi-tang.webp",
+      width: 384,
+      height: 307,
+      cssClass: "encounter-mist",
+      threat: "CAO",
+      recoverability: "CÓ THỂ",
+      entryStats: { alert: 4, ritual: 6 },
+      role: "Các túi mô ở cổ, vai và ngực phát tán hơi dịch mang tín hiệu ru ngủ, làm sai lệch nhận thức và gọi mạng lưới tới vị trí mục tiêu.",
+      intro: "Người nữ chăm phòng bước ra với những khối mô nổi dọc cổ và vai. Bà không lao tới; bà hít vào thật sâu, rồi tiếng ru phát ra cùng một lớp hơi ẩm tan chậm trong ánh đèn.",
+      scan: "Phổi và thanh quản vẫn hoạt động theo ý thức người, nhưng các túi mô phụ đang chèn một nhịp âm khác vào hơi thở. Vật chủ có thể còn cứu được nếu ngăn phát tán và giữ đường thở."
+    },
+    effusion: {
+      name: "Thợ Thở Dịch Mẫu",
+      image: "assets/encounters/tho-tho-dich-mau.webp",
+      width: 384,
+      height: 307,
+      cssClass: "encounter-effusion",
+      threat: "RẤT CAO",
+      recoverability: "THẤP",
+      entryStats: { alert: 5, ritual: 7 },
+      role: "Khối mô vùng bụng và hông rải dịch ký sinh lên nền, tạo vùng bám giữ và những điểm truyền phụ cho nghi lễ.",
+      intro: "Một người đàn bà gập người trong gian bếp. Khối thịt ở hông mở ra theo từng nhịp thở, kéo những sợi dịch dài qua nền và nối chúng với tường như đang dựng thêm một cơ quan cho căn nhà.",
+      scan: "Ổ trùng đã ăn sâu vào ổ bụng nhưng nhịp tim vật chủ vẫn tách biệt. Mỗi vệt dịch mới làm nghi lễ ổn định hơn; trì hoãn cứu hộ đồng nghĩa để căn phòng trở thành một điểm neo."
     }
   };
 
@@ -56,10 +120,28 @@
   });
 
   function encounterForState(state) {
-    if (state.stats.alert >= 30) return "manylimb";
-    if (state.flags.route === "Lối vận chuyển") return "carrier";
-    if (state.flags.route === "Bờ đá") return "reacher";
-    return "bloom";
+    const alert = Number(state.stats.alert) || 0;
+    const ritual = Number(state.stats.ritual) || 0;
+    const evidence = Number(state.stats.evidence) || 0;
+    const route = state.flags.route;
+
+    if (ritual >= 50) return "effusion";
+    if (alert >= 40) return "crawler";
+    if (evidence >= 3) return "mist";
+
+    if (route === "Lối vận chuyển") {
+      return alert >= 18 ? "offset" : "carrier";
+    }
+
+    if (route === "Bờ đá") {
+      return ritual >= 35 ? "mist" : "reacher";
+    }
+
+    if (route === "Vườn thuốc") {
+      return alert >= 28 ? "manylimb" : "bloom";
+    }
+
+    return alert >= 25 ? "manylimb" : "bloom";
   }
 
   function encounterSceneId(state) {
@@ -90,7 +172,7 @@
         "Kai chỉ có vài giây để quyết định đây là một mục tiêu phải tiêu diệt, một vật chủ còn có thể cứu, hay một chướng ngại nên tránh."
       ],
       onEnter: {
-        stats: { alert: id === "manylimb" ? 6 : 3, ritual: 3 },
+        stats: entry.entryStats,
         flags: {
           encounterStarted: true,
           encounterType: id,
@@ -302,9 +384,9 @@
 
     .encounter-card {
       display: grid;
-      grid-template-columns: minmax(11rem, 15rem) 1fr;
+      grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
       gap: 1rem;
-      align-items: stretch;
+      align-items: center;
       overflow: hidden;
       border: 1px solid var(--line);
       border-left: 3px solid var(--danger);
@@ -315,20 +397,30 @@
       box-shadow: 0 18px 38px rgb(0 0 0 / 28%);
     }
 
-    .encounter-card img {
+    .encounter-card__media {
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      height: 100%;
+      background: #090706;
+    }
+
+    .encounter-card__image {
       display: block;
       width: 100%;
-      height: 100%;
-      min-height: 13.5rem;
-      object-fit: cover;
+      height: auto;
+      max-height: 28rem;
+      object-fit: contain;
+      object-position: center;
+      image-rendering: auto;
       background: #090706;
-      filter: contrast(1.05) saturate(.88);
     }
 
     .encounter-card__body {
       display: grid;
       align-content: center;
       gap: .7rem;
+      min-width: 0;
       padding: 1rem 1rem 1rem 0;
     }
 
@@ -373,14 +465,17 @@
       line-height: 1.55;
     }
 
-    @media (max-width: 620px) {
+    @media (max-width: 720px) {
       .encounter-card {
         grid-template-columns: 1fr;
       }
 
-      .encounter-card img {
-        aspect-ratio: 16 / 10;
-        min-height: 0;
+      .encounter-card__media {
+        height: auto;
+      }
+
+      .encounter-card__image {
+        max-height: 24rem;
       }
 
       .encounter-card__body {
@@ -406,7 +501,17 @@
       const card = document.createElement("div");
       card.className = "encounter-card";
       card.innerHTML = `
-        <img src="${entry.image}" alt="${entry.name}" width="220" height="220" decoding="async">
+        <div class="encounter-card__media">
+          <img
+            class="encounter-card__image"
+            src="${entry.image}"
+            alt="${entry.name}"
+            width="${entry.width}"
+            height="${entry.height}"
+            loading="eager"
+            decoding="async"
+          >
+        </div>
         <div class="encounter-card__body">
           <p class="encounter-card__eyebrow">MATER HOST // PHÂN LOẠI TẠM</p>
           <h3 class="encounter-card__name">${entry.name}</h3>
