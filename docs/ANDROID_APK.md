@@ -29,7 +29,7 @@ Sau mỗi lần gọi thành công, APK chuyển sang key kế tiếp. Khi một
 
 ## Mở lại màn hình cấu hình
 
-Trong APK, chạm vào trạng thái API ở khu vực nhập hành động để mở lại màn hình cấu hình. Có thể thay toàn bộ danh sách hoặc xóa tất cả key.
+Chạm nút bánh răng ở góc trên bên phải APK để mở lại màn hình cấu hình. Có thể thay toàn bộ danh sách hoặc xóa tất cả key.
 
 ## Model mặc định
 
