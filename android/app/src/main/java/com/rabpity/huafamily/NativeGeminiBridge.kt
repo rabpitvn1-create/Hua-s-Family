@@ -4,18 +4,16 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
-import com.google.firebase.ai.type.content
-import com.google.firebase.ai.type.generationConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class NativeGeminiBridge(
     private val activity: AppCompatActivity,
     private val webView: WebView,
-    private val firebaseReady: Boolean
+    private val keyVault: ApiKeyVault,
+    private val openKeySettings: () -> Unit
 ) {
     private val allowedModels = setOf(
         BuildConfig.DIRECTOR_MODEL,
@@ -23,12 +21,21 @@ class NativeGeminiBridge(
     )
 
     @JavascriptInterface
-    fun getConfiguration(): String = JSONObject()
-        .put("firebaseReady", firebaseReady)
-        .put("directorModel", BuildConfig.DIRECTOR_MODEL)
-        .put("writerModel", BuildConfig.WRITER_MODEL)
-        .put("pipeline", "firebase-ai-director-writer-v1")
-        .toString()
+    fun getConfiguration(): String {
+        val keyCount = keyVault.getKeys().size
+        return JSONObject()
+            .put("apiReady", keyCount > 0)
+            .put("apiKeyCount", keyCount)
+            .put("directorModel", BuildConfig.DIRECTOR_MODEL)
+            .put("writerModel", BuildConfig.WRITER_MODEL)
+            .put("pipeline", "direct-gemini-multi-key-v1")
+            .toString()
+    }
+
+    @JavascriptInterface
+    fun openApiKeySettings() {
+        webView.post(openKeySettings)
+    }
 
     @JavascriptInterface
     fun generate(
@@ -38,8 +45,9 @@ class NativeGeminiBridge(
         prompt: String,
         maxOutputTokens: Int
     ) {
-        if (!firebaseReady) {
-            reject(requestId, "APK chưa được cấu hình Firebase AI Logic.")
+        val keys = keyVault.getKeys()
+        if (keys.isEmpty()) {
+            reject(requestId, "APK chưa có Gemini API key. Hãy mở Cấu hình API key.")
             return
         }
 
@@ -48,34 +56,26 @@ class NativeGeminiBridge(
             return
         }
 
-        val safeSystem = systemInstruction.take(80_000)
-        val safePrompt = prompt.take(160_000)
-        val tokenLimit = maxOutputTokens.coerceIn(256, 4_096)
-
         activity.lifecycleScope.launch {
             try {
-                val config = generationConfig {
-                    responseMimeType = "application/json"
-                    this.maxOutputTokens = tokenLimit
+                val startIndex = keyVault.getStartIndex(keys.size)
+                val result = withContext(Dispatchers.IO) {
+                    GeminiApiClient.generate(
+                        apiKeys = keys,
+                        startIndex = startIndex,
+                        modelName = modelName,
+                        systemInstruction = systemInstruction,
+                        prompt = prompt,
+                        maxOutputTokens = maxOutputTokens
+                    )
                 }
 
-                val model = Firebase.ai(
-                    backend = GenerativeBackend.googleAI()
-                ).generativeModel(
-                    modelName = modelName,
-                    generationConfig = config,
-                    systemInstruction = content { text(safeSystem) }
-                )
-
-                val response = model.generateContent(safePrompt)
-                val output = response.text?.trim()
-                    ?: throw IllegalStateException("Gemini không trả về nội dung.")
-
-                resolve(requestId, output)
+                keyVault.advanceAfter(result.keyIndex, keys.size)
+                resolve(requestId, result.text)
             } catch (error: Throwable) {
                 reject(
                     requestId,
-                    error.message?.take(500) ?: "Không thể gọi Firebase AI Logic."
+                    error.message?.take(500) ?: "Không thể gọi Gemini API."
                 )
             }
         }

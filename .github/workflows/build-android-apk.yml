@@ -12,6 +12,7 @@ on:
       - "index.html"
       - "styles.css"
       - "ai-styles.css"
+      - "iphone-ui.css"
       - ".github/workflows/build-android-apk.yml"
   push:
     branches: [main]
@@ -24,6 +25,7 @@ on:
       - "index.html"
       - "styles.css"
       - "ai-styles.css"
+      - "iphone-ui.css"
       - ".github/workflows/build-android-apk.yml"
 
 permissions:
@@ -35,11 +37,6 @@ jobs:
     timeout-minutes: 30
 
     env:
-      FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-      FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-      FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
       GEMINI_DIRECTOR_MODEL: ${{ vars.GEMINI_DIRECTOR_MODEL }}
       GEMINI_WRITER_MODEL: ${{ vars.GEMINI_WRITER_MODEL }}
 

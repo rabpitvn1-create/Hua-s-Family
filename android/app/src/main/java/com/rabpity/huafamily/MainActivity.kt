@@ -2,61 +2,171 @@ package com.rabpity.huafamily
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputType
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
-import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
+    private lateinit var keyVault: ApiKeyVault
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val firebaseReady = initializeFirebase()
-        webView = createWebView(firebaseReady)
-        setContentView(webView)
+        keyVault = ApiKeyVault(this)
+        webView = createWebView()
+        setContentView(createRootView())
         webView.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
+
+        if (keyVault.getKeys().isEmpty()) {
+            webView.postDelayed({ showApiKeyDialog() }, 650)
+        }
     }
 
-    private fun initializeFirebase(): Boolean {
-        val apiKey = BuildConfig.FIREBASE_API_KEY.trim()
-        val appId = BuildConfig.FIREBASE_APP_ID.trim()
-        val projectId = BuildConfig.FIREBASE_PROJECT_ID.trim()
+    private fun createRootView(): FrameLayout {
+        val root = FrameLayout(this)
+        root.addView(
+            webView,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
 
-        if (apiKey.isBlank() || appId.isBlank() || projectId.isBlank()) return false
-
-        if (FirebaseApp.getApps(this).isEmpty()) {
-            val options = FirebaseOptions.Builder()
-                .setApiKey(apiKey)
-                .setApplicationId(appId)
-                .setProjectId(projectId)
-                .apply {
-                    BuildConfig.FIREBASE_MESSAGING_SENDER_ID.trim()
-                        .takeIf(String::isNotBlank)
-                        ?.let(::setGcmSenderId)
-                    BuildConfig.FIREBASE_STORAGE_BUCKET.trim()
-                        .takeIf(String::isNotBlank)
-                        ?.let(::setStorageBucket)
-                }
-                .build()
-
-            FirebaseApp.initializeApp(this, options)
+        val settingsButton = ImageButton(this).apply {
+            setImageResource(android.R.drawable.ic_menu_manage)
+            setBackgroundColor(Color.TRANSPARENT)
+            contentDescription = "Cấu hình Gemini API key"
+            alpha = 0.82f
+            setPadding(dp(10), dp(10), dp(10), dp(10))
+            setOnClickListener { showApiKeyDialog() }
         }
 
-        AppCheckInitializer.install()
-        return true
+        val buttonLayout = FrameLayout.LayoutParams(dp(48), dp(48), Gravity.TOP or Gravity.END).apply {
+            topMargin = dp(6)
+            marginEnd = dp(6)
+        }
+        root.addView(settingsButton, buttonLayout)
+        return root
+    }
+
+    private fun showApiKeyDialog() {
+        if (isFinishing || isDestroyed) return
+
+        val existingCount = keyVault.getKeys().size
+        val summary = TextView(this).apply {
+            text = if (existingCount > 0) {
+                "Đang lưu $existingCount API key đã mã hóa trên thiết bị."
+            } else {
+                "Chưa có API key."
+            }
+            setPadding(0, 0, 0, dp(12))
+        }
+
+        val instructions = TextView(this).apply {
+            text = "Dán mỗi Gemini API key trên một dòng. Danh sách mới sẽ thay thế danh sách cũ. Tối đa ${ApiKeyVault.MAX_KEYS} key."
+            setPadding(0, 0, 0, dp(10))
+        }
+
+        val input = EditText(this).apply {
+            hint = "AIza...\nAIza...\nAIza..."
+            minLines = 5
+            maxLines = 10
+            gravity = Gravity.TOP or Gravity.START
+            typeface = Typeface.MONOSPACE
+            inputType = InputType.TYPE_CLASS_TEXT or
+                InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            setHorizontallyScrolling(false)
+        }
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(8), dp(24), 0)
+            addView(summary)
+            addView(instructions)
+            addView(input)
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Cấu hình Gemini API key")
+            .setView(container)
+            .setPositiveButton("Lưu danh sách", null)
+            .setNeutralButton("Xóa tất cả", null)
+            .setNegativeButton("Đóng", null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val keys = input.text
+                    .toString()
+                    .split(Regex("[\\n,;]+"))
+                    .map(String::trim)
+                    .filter(String::isNotBlank)
+
+                val savedCount = keyVault.saveKeys(keys)
+                if (savedCount <= 0) {
+                    input.error = "Không tìm thấy API key hợp lệ."
+                    return@setOnClickListener
+                }
+
+                Toast.makeText(
+                    this,
+                    "Đã lưu $savedCount API key trên thiết bị.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                notifyApiKeyConfigurationChanged()
+                dialog.dismiss()
+            }
+
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                AlertDialog.Builder(this)
+                    .setTitle("Xóa toàn bộ API key?")
+                    .setMessage("Game sẽ không gọi được Gemini cho đến khi bạn nhập lại key.")
+                    .setPositiveButton("Xóa") { _, _ ->
+                        keyVault.clear()
+                        input.text?.clear()
+                        summary.text = "Chưa có API key."
+                        notifyApiKeyConfigurationChanged()
+                        Toast.makeText(this, "Đã xóa toàn bộ API key.", Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton("Hủy", null)
+                    .show()
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun notifyApiKeyConfigurationChanged() {
+        if (!::webView.isInitialized) return
+        webView.post {
+            webView.evaluateJavascript(
+                "if (window.__huaApiKeysChanged) window.__huaApiKeysChanged();",
+                null
+            )
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun createWebView(firebaseReady: Boolean): WebView {
+    private fun createWebView(): WebView {
         val assetLoader = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
@@ -71,7 +181,12 @@ class MainActivity : AppCompatActivity() {
             settings.displayZoomControls = false
 
             addJavascriptInterface(
-                NativeGeminiBridge(this@MainActivity, this, firebaseReady),
+                NativeGeminiBridge(
+                    activity = this@MainActivity,
+                    webView = this,
+                    keyVault = keyVault,
+                    openKeySettings = this@MainActivity::showApiKeyDialog
+                ),
                 "HuaAndroid"
             )
 
@@ -93,6 +208,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {

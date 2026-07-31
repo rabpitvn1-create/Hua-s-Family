@@ -5,63 +5,47 @@
 APK đóng gói toàn bộ giao diện web trong Android WebView. Khi người chơi gửi hành động:
 
 1. JavaScript lập dữ liệu cho model đạo diễn.
-2. Kotlin gọi `gemini-3.5-flash-lite` qua Firebase AI Logic để xử lý logic, chỉ số và hậu quả.
-3. JavaScript khóa kế hoạch cảnh.
-4. Kotlin gọi `gemini-3.6-flash` để viết lời kể, hội thoại và ba lựa chọn.
-5. Kết quả được lưu vào bộ nhớ cục bộ của WebView.
+2. Kotlin gọi Gemini Developer API trực tiếp qua HTTPS.
+3. Model đạo diễn xử lý logic, chỉ số và hậu quả.
+4. JavaScript khóa kế hoạch cảnh.
+5. Model viết văn tạo lời kể, hội thoại và ba lựa chọn.
+6. Kết quả được lưu vào bộ nhớ cục bộ của WebView.
 
-APK không cần Vercel và không chứa `GEMINI_API_KEY`.
+APK không cần Vercel, Firebase hoặc GitHub Secrets chứa API key.
 
-## Tạo Firebase project
+## Nhập nhiều Gemini API key
 
-1. Mở Firebase Console và tạo project.
-2. Vào **AI Services → AI Logic → Get started**.
-3. Chọn **Gemini Developer API**.
-4. Đăng ký Android app với package:
+Khi mở APK lần đầu, màn hình **Cấu hình Gemini API key** tự xuất hiện.
 
-```text
-com.rabpity.huafamily.debug
-```
+- Dán mỗi API key trên một dòng.
+- Có thể dùng dấu phẩy hoặc dấu chấm phẩy để phân cách.
+- Tối đa 20 key.
+- Danh sách mới thay thế danh sách cũ.
+- Key không được đưa vào bản lưu game, WebView, log hoặc repository.
 
-5. Với bản phát hành sau này, đăng ký thêm:
+APK mã hóa danh sách key bằng AES-GCM. Khóa mã hóa nằm trong Android Keystore và không thể xuất trực tiếp khỏi thiết bị theo cách thông thường.
 
-```text
-com.rabpity.huafamily
-```
+Sau mỗi lần gọi thành công, APK chuyển sang key kế tiếp. Khi một key trả lỗi xác thực, quyền truy cập, quota, giới hạn tần suất hoặc lỗi máy chủ tạm thời, APK thử key tiếp theo. Lỗi prompt hoặc model không hợp lệ không bị che bằng việc đổi key.
 
-## GitHub Secrets cần thêm
+## Mở lại màn hình cấu hình
 
-Vào repository → **Settings → Secrets and variables → Actions → New repository secret**.
+Chạm nút bánh răng ở góc trên bên phải APK để mở lại màn hình cấu hình. Có thể thay toàn bộ danh sách hoặc xóa tất cả key.
 
-Thêm các giá trị lấy từ cấu hình Android app trong Firebase:
+## Model mặc định
 
 ```text
-FIREBASE_API_KEY
-FIREBASE_APP_ID
-FIREBASE_PROJECT_ID
-FIREBASE_MESSAGING_SENDER_ID
-FIREBASE_STORAGE_BUCKET
+Đạo diễn: gemini-3.5-flash-lite
+Viết văn: gemini-3.6-flash
 ```
 
-`FIREBASE_API_KEY` ở đây là Firebase Web API key trong cấu hình project. APK không dùng Gemini API key trực tiếp.
-
-Có thể thêm hai repository variables, nhưng không bắt buộc:
+Có thể đổi bằng repository variables:
 
 ```text
-GEMINI_DIRECTOR_MODEL=gemini-3.5-flash-lite
-GEMINI_WRITER_MODEL=gemini-3.6-flash
+GEMINI_DIRECTOR_MODEL
+GEMINI_WRITER_MODEL
 ```
 
-## App Check cho APK debug
-
-APK debug dùng App Check Debug Provider. Sau khi cài và mở APK lần đầu:
-
-1. Kết nối điện thoại với `adb logcat` hoặc mở Logcat trong Android Studio.
-2. Tìm dòng `DebugAppCheckProvider` chứa debug token.
-3. Vào Firebase Console → **Security → App Check → Apps**.
-4. Chọn app debug → **Manage debug tokens** → thêm token.
-
-Bản release dùng Play Integrity thay vì debug token.
+Model có trong APK chỉ là tên model. API key luôn do người dùng nhập sau khi cài đặt.
 
 ## Build APK trên GitHub
 
@@ -80,12 +64,6 @@ Tải APK:
 
 APK được giữ 30 ngày trong artifact của GitHub Actions.
 
-## Trạng thái khi chưa có Firebase Secrets
+## Lưu ý bảo mật
 
-GitHub vẫn build được APK, nhưng nút tạo lượt mới sẽ báo:
-
-```text
-APK chưa được cấu hình Firebase AI Logic.
-```
-
-Sau khi thêm đủ secrets, chạy lại workflow để tạo APK hoạt động qua Internet.
+Đây là chế độ dùng key cá nhân trên chính thiết bị của người dùng. Không phát hành APK đã chèn sẵn API key. Không gửi key qua email, issue, commit, log hoặc ảnh chụp màn hình. Khi chia sẻ APK, mỗi người tự nhập key của họ.

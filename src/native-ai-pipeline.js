@@ -36,7 +36,7 @@ function installNativeCallbacks() {
     if (!request) return;
     pendingRequests.delete(requestId);
     clearTimeout(request.timeout);
-    request.reject(new Error(String(message || "Firebase AI Logic trả lỗi.")));
+    request.reject(new Error(String(message || "Gemini API trả lỗi.")));
   };
 }
 
@@ -48,13 +48,19 @@ export function hasNativeAiBridge() {
     && typeof window.HuaAndroid.generate === "function";
 }
 
-function getNativeConfiguration() {
+export function getNativeAiConfiguration() {
   if (!hasNativeAiBridge()) return null;
   try {
     return JSON.parse(window.HuaAndroid.getConfiguration());
   } catch {
     return null;
   }
+}
+
+export function openNativeApiKeySettings() {
+  if (!hasNativeAiBridge() || typeof window.HuaAndroid.openApiKeySettings !== "function") return false;
+  window.HuaAndroid.openApiKeySettings();
+  return true;
 }
 
 function parseJson(text, label) {
@@ -72,7 +78,7 @@ function parseJson(text, label) {
 
 function invokeNativeModel({ model, systemInstruction, prompt, schema, maxOutputTokens }) {
   if (!hasNativeAiBridge()) {
-    return Promise.reject(new Error("APK chưa có cầu nối Firebase AI Logic."));
+    return Promise.reject(new Error("APK chưa có cầu nối Gemini API."));
   }
 
   const requestId = `hua-${Date.now()}-${sequence += 1}`;
@@ -81,8 +87,8 @@ function invokeNativeModel({ model, systemInstruction, prompt, schema, maxOutput
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       pendingRequests.delete(requestId);
-      reject(new Error("Firebase AI Logic phản hồi quá thời gian."));
-    }, 150000);
+      reject(new Error("Gemini API phản hồi quá thời gian."));
+    }, 170000);
 
     pendingRequests.set(requestId, { resolve, reject, timeout });
 
@@ -103,9 +109,9 @@ function invokeNativeModel({ model, systemInstruction, prompt, schema, maxOutput
 }
 
 export async function runNativeCampaignTurn(rawState, rawAction) {
-  const configuration = getNativeConfiguration();
-  if (!configuration?.firebaseReady) {
-    throw new Error("APK chưa được cấu hình Firebase AI Logic.");
+  const configuration = getNativeAiConfiguration();
+  if (!configuration?.apiReady) {
+    throw new Error("APK chưa có Gemini API key. Hãy mở Cấu hình API key.");
   }
 
   const action = cleanText(rawAction, 600);
