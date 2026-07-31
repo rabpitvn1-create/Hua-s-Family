@@ -82,15 +82,33 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     });
   }
 
+  function renderDialogue(dialogue) {
+    if (!elements.dialogue) return;
+    elements.dialogue.replaceChildren();
+    dialogue.forEach((line) => {
+      const row = document.createElement("p");
+      row.className = "ai-dialogue-line";
+
+      const speaker = document.createElement("strong");
+      speaker.textContent = line.speaker;
+
+      const text = document.createElement("span");
+      text.textContent = line.text;
+
+      row.append(speaker, text);
+      elements.dialogue.append(row);
+    });
+  }
+
   function renderAppliedTurn(turn) {
     if (!elements.output || !elements.narration || !elements.dialogue) return;
     elements.output.hidden = false;
     elements.narration.replaceChildren();
-    elements.dialogue.replaceChildren();
 
     const notice = document.createElement("p");
     notice.textContent = turn.summary || "Lượt mới đã được ghi vào cốt truyện chính.";
     elements.narration.append(notice);
+    renderDialogue(turn.dialogue);
     renderSuggestions(turn.choices);
   }
 
