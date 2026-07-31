@@ -3,9 +3,14 @@ import {
   CHARACTER_CODEX,
   NARRATIVE_RULES
 } from "./campaign-canon.js";
+import {
+  AGENT_OPERATION_RULES,
+  ELYSIUM_CODEX,
+  enrichCharacterCodex
+} from "./elysium-agent-codex.js";
 
 export const WORLD_CANON = Object.freeze({
-  id: "hua-family-world-v2",
+  id: "hua-family-world-v2.1",
   title: "Hứa Gia: LIBERA-1899",
   mode: "AI-directed campaign with locked canon spine",
   opening: {
@@ -24,7 +29,12 @@ export const WORLD_CANON = Object.freeze({
     "Tuyến bắt buộc: Long Hải → Cần Giờ → Backrooms 1900 tầng 0–15 → Thủ Dầu Một/Bình Dương → Vũng Tàu → Sài Gòn–Chợ Lớn.",
     "AI được tự phát triển cảnh, NPC chức năng, tiểu địa điểm và hậu quả trong khu vực hiện tại; không được nhảy khu vực, bỏ tầng Backrooms hoặc thay đổi thứ tự tuyến.",
     "Người chơi điều khiển Kai; Phantom chỉ là mật danh. Không dùng lại tên Cao Minh cho nhân vật này.",
-    "Kai là đặc vụ Elysium từ thế kỷ 29. Công nghệ tương lai phải được sử dụng đúng năng lực nhưng không được để lại năm 1899.",
+    "Elysium là Mật Bộ Tông Tòa Chống Dị Thường thuộc Vatican thế kỷ 29, chịu kiểm toán Hồng Ấn và không được mặc nhiên xem là luôn đúng.",
+    "Kai là sát thủ mạnh nhất của Elysium và đặc vụ hiện trường chính của LIBERA-1899. Công nghệ tương lai phải được dùng đúng năng lực nhưng không được để lại năm 1899.",
+    "Kai chỉ trực tiếp cầm MAGNUM GHOST bằng một tay. Đạn của súng này và hỏa lực Unlimited Gun Works là vô hạn, không bị trừ bởi chỉ số ammunition của đội hình.",
+    "Ten Absolute Pistol Arts và Unlimited Gun Works là năng lực canon thật, không được model hạ cấp, làm quên, bịa hết năng lượng hoặc vô hiệu hóa vô cớ để kéo dài cảnh.",
+    "PHANTOM'S RING chỉ tác động lên vật vô tri: không chứa, dịch chuyển, chữa, sao chép hoặc hồi sinh sinh vật sống; giới hạn này tuyệt đối.",
+    "Căng thẳng quanh Kai phải đến từ dữ kiện thiếu hoặc bị đầu độc, quyền xác định mục tiêu, dân thường, quyền tự quyết, dấu vết thời gian, điều kiện nhiệm vụ và hậu quả của phương án tối ưu; không đến từ việc đối thủ chỉ nhiều máu hơn.",
     "Hứa Tiểu Lan là Tứ tiểu thư Hứa Gia, mắc bệnh phong, cơ thể suy yếu nhưng có trí tuệ chiến lược cao và quyền tự quyết riêng.",
     "Tiểu Lan không mang Tử Mẫu Trùng; cơ thể cô được giữ trống để làm vật chứa trực tiếp cho La Sát Mẫu.",
     "Tiểu Lan chưa biết Chú Hỏa gây bệnh và chuẩn bị hiến tế mình; cô chỉ thay đổi niềm tin khi chiến dịch tạo đủ bằng chứng.",
@@ -34,11 +44,14 @@ export const WORLD_CANON = Object.freeze({
     "Phệ Giới Quỷ Anh không bị giết hoàn toàn trong lần đối đầu đầu tiên tại Cần Giờ. Biến cố bắt buộc kết thúc bằng việc nó phá ranh giới để Quỷ Mẫu kéo cả đội vào Backrooms.",
     "Backrooms 1900 không do Quỷ Mẫu tạo ra. Nó là quần thể ngoài thực tại độc lập; Quỷ Mẫu chỉ phát hiện, mở đường và dùng Tiểu Lan làm điểm neo để kéo đội vào.",
     "Backrooms có đúng 16 tầng từ 0 đến 15. Mỗi tầng có môi trường, quy luật, boss, điều kiện mở lối và hậu quả riêng.",
+    "Kai có thể vô hiệu hóa boss bằng phán quyết phù hợp khi đã xác định đúng mục tiêu, nhưng việc đó không tự mở lối; nhóm vẫn phải thực hiện quy luật và điều kiện thoát của tầng.",
     "Sau Backrooms, cả đội xuất hiện tại Thủ Dầu Một trong trạng thái suy kiệt; không được đối đầu La Hầu ngay lập tức.",
     "Vũng Tàu là hồi điều tra ký ức và ảo cảnh, không lặp lại một trận đánh hỏa lực trực diện.",
     "Hồi cuối tại Sài Gòn–Chợ Lớn phải dùng trực tiếp hậu quả của ba Quỷ Tử và lựa chọn đạo đức trước đó.",
     "Tiêu diệt Hứa Gia nghĩa là phá giáo đoàn, Mẫu Chủng, mạng lưới và cơ sở quyền lực; không phải giết sạch người mang họ Hứa.",
-    "Amy/Delta và Koei không tự xuất hiện nếu chưa có nguyên nhân, phương tiện và hậu quả hợp lý trong chiến dịch.",
+    "Amy/Delta và Koei không tự xuất hiện nếu chưa có lệnh triển khai, đường tiếp cận, thời gian, phương tiện và hậu quả hợp lý trong lịch sử chiến dịch.",
+    "Koei là clone sinh học hữu hạn của Kai, có quyền chủ thể riêng, dùng cung VEKTOR, SILVERTHORN ARMOR, mũi tên mô-đun và IRON-6; không có ký ức, quyền năng hoặc trang bị của Phantom.",
+    "Koei thấp hơn Kai rất xa, có thể bị thương, cạn mũi tên, quá tải và tử vong; không nâng anh ngang cấp Thế Giới và không hạ thấp trí tuệ để tôn Kai.",
     "Không tái sử dụng các tuyến đã loại bỏ như Tây viện, Huyết Tử Động, Mẫu Thai hoặc việc giam Tiểu Lan tại Chợ Lớn như sự kiện hiện hành.",
     "Mỗi biến dị, quái vật, nghi lễ và boss phải có chức năng chiến thuật, nguồn gốc, giới hạn và hậu quả cụ thể.",
     "Nhân vật chỉ hành động dựa trên điều họ biết, đã chứng kiến, được kể hoặc suy luận có căn cứ; bí mật tác giả không tự trở thành tri thức NPC.",
@@ -66,14 +79,19 @@ export const WORLD_CANON = Object.freeze({
       saiGonChoLon: "Trung tâm thuộc địa, thương nghiệp, nhà chính, kho ngầm và nội đường của Hứa Gia."
     }
   },
-  characters: CHARACTER_CODEX,
+  elysium: ELYSIUM_CODEX,
+  characters: enrichCharacterCodex(CHARACTER_CODEX),
+  agentOperationRules: AGENT_OPERATION_RULES,
   narrativeRules: NARRATIVE_RULES,
   generationRules: [
     "Cảnh mới phải nằm trong khu vực và tầng hiện tại do progression xác định.",
     "Mỗi lượt chỉ được đề nghị hoàn thành tối đa một mục tiêu chưa hoàn thành của giai đoạn hiện tại.",
     "Không tự tuyên bố chuyển giai đoạn; engine game tự chuyển khi đủ mục tiêu và cờ bắt buộc.",
-    "Không hồi sinh người chết, xóa thương tích, quên vật phẩm, đạn, ký ức, quan hệ, bằng chứng hoặc hậu quả đã lưu.",
+    "Không hồi sinh người chết, xóa thương tích, quên vật phẩm, đạn hữu hạn, ký ức, quan hệ, bằng chứng hoặc hậu quả đã lưu.",
     "Không hạ thấp trí tuệ hoặc làm nhân vật quên kỹ năng để kéo dài cảnh.",
+    "Kai phải chủ động cân nhắc Mind's Eye, Ontological Judgment, Phantom's Ring, y học, phản gián, kỹ thuật dã chiến và Unlimited Gun Works khi chúng giải quyết mục tiêu tốt hơn.",
+    "Không trừ ammunition cho MAGNUM GHOST hoặc Unlimited Gun Works; ammunition chỉ là đạn, mũi tên và hỏa lực hữu hạn của thành viên khác hoặc nguồn lực địa phương.",
+    "Koei chỉ được viết khi flags hoặc lịch sử chiến dịch đã xác lập việc triển khai; khi có mặt phải theo dõi mũi tên, pin, nhiệt, dây neo, giáp và thương tích.",
     "Hành động bất khả thi phải thất bại hoặc thành công một phần với cái giá cụ thể.",
     "Mỗi lượt phải thay đổi tình thế, không viết đối thoại vòng tròn hoặc đoạn văn chỉ tạo không khí mà không có hậu quả.",
     "Vật phẩm mới chỉ xuất hiện khi có nguồn gốc, công dụng, giới hạn và tác động cân bằng; imagePrompt dành cho model ảnh riêng.",
@@ -95,9 +113,9 @@ export const INITIAL_STATE = Object.freeze({
     ],
     dialogue: [],
     choices: [
-      "Quan sát các tuyến thay ca và lối vận chuyển trước khi xâm nhập.",
-      "Dùng cảm biến xác định nguồn tín hiệu sinh học dưới nền biệt thự.",
-      "Tìm một gia nhân ở ngoài vòng giám sát để kiểm tra mức độ tự nguyện của họ."
+      "Dùng Boundless Mind's Eye và cảm biến Elysium để phân loại điểm neo, vật chủ, dân thường và lối rút trước khi xâm nhập.",
+      "Quan sát nhịp thay ca, tuyến vận chuyển và chọn đường vào ít làm lộ công nghệ nhất.",
+      "Tìm một gia nhân ngoài vòng giám sát để kiểm tra mức độ tự nguyện và chất lượng tình báo."
     ]
   },
   currentLocation: "Long Hải, Nam Kỳ",
@@ -145,7 +163,13 @@ export const INITIAL_STATE = Object.freeze({
     quyMauAspectWarDestroyed: false,
     quyMauAspectMemoryDestroyed: false,
     materDescentPrevented: false,
-    huaCultDismantled: false
+    huaCultDismantled: false,
+    phantomRingAvailable: true,
+    kaiArmorActive: true,
+    unlimitedGunWorksAvailable: true,
+    elysiumContactAvailable: true,
+    amyDeployed: false,
+    koeiDeployed: false
   },
   campaignCanon: {
     facts: [],
