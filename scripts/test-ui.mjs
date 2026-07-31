@@ -43,14 +43,29 @@ if (missingScripts.length) {
   throw new Error(`Không tìm thấy script giao diện: ${missingScripts.join(", ")}`);
 }
 
+const localImages = [...html.matchAll(/<img[^>]+src="([^"]+)"/g)]
+  .map((match) => match[1])
+  .filter((path) => !/^https?:|^data:/i.test(path));
+const missingImages = localImages.filter((path) => !existsSync(path));
+if (missingImages.length) {
+  throw new Error(`Không tìm thấy asset hình ảnh: ${missingImages.join(", ")}`);
+}
+
 for (const path of stylesheetPaths) {
   if (!gradle.includes(`include("${path}")`)) {
     throw new Error(`APK chưa đóng gói stylesheet ${path}.`);
   }
 }
 
+if (localImages.some((path) => path.startsWith("assets/")) && !gradle.includes('include("assets/**")')) {
+  throw new Error("APK chưa đóng gói thư mục assets/**.");
+}
+
 if (html.includes("iphone-ui.css")) {
   throw new Error("index.html vẫn còn nạp lớp typography cũ.");
 }
 
-console.log(`UI integrity check passed: ${requiredIds.length} required IDs, ${stylesheetPaths.length} stylesheets.`);
+console.log(
+  `UI integrity check passed: ${requiredIds.length} required IDs, `
+  + `${stylesheetPaths.length} stylesheets, ${localImages.length} local images.`
+);
