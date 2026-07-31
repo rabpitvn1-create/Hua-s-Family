@@ -74,6 +74,11 @@ body.focus-mode .story-panel { width: 100%; }
 }
 
 @media (max-width: 760px) {
+  body {
+    --ink-dim: #ccbea6;
+    --ink-faint: #9d907c;
+  }
+
   .shell { width: 100%; padding-top: 0; }
 
   .campaign-header {
@@ -109,7 +114,11 @@ body.focus-mode .story-panel { width: 100%; }
   }
   .field-rail .operator-card,
   .field-rail .target-card { min-width: 0; }
-  .portrait-frame { aspect-ratio: 1.8 / 1; }
+  .portrait-frame {
+    width: min(100%, 8.75rem);
+    aspect-ratio: 1;
+    margin-inline: auto;
+  }
   .profile-copy h2 { font-size: 1rem; }
   .profile-copy p:last-child,
   .profile-vitals,
@@ -148,7 +157,33 @@ body.focus-mode .story-panel { width: 100%; }
 @media (max-width: 440px) {
   .header-subtitle,
   .elysium-stamp small { display: none; }
-  .field-rail { grid-template-columns: 1fr; }
+
+  .field-rail {
+    grid-template-columns: 1fr;
+    padding: .6rem 1rem;
+  }
+
+  .field-rail .operator-card {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    align-items: center;
+    gap: .8rem;
+    padding: .65rem;
+  }
+
+  .field-rail .operator-card .portrait-frame {
+    width: 7rem;
+    margin: 0;
+    aspect-ratio: 1;
+  }
+
+  .field-rail .operator-card .profile-copy { padding-top: 0; }
+  .field-rail .operator-card .profile-copy p:last-child {
+    display: block;
+    color: var(--ink-dim);
+    font-size: .66rem;
+  }
+
   .field-rail .target-card { display: none; }
   .story-text .dialogue.has-avatar,
   .ai-dialogue-line.has-avatar { grid-template-columns: 3.45rem minmax(0,1fr); }
@@ -156,6 +191,22 @@ body.focus-mode .story-panel { width: 100%; }
   .ai-dialogue-line.has-avatar > .dialogue-avatar { width: 3.45rem; height: 3.45rem; }
   .ai-actions { grid-template-columns: 1fr; }
   .ai-actions button:first-child { grid-column: auto; }
+}
+
+/* Giữ chân dung raster 160×160 ở kích thước hợp lý và loại bỏ lớp xử lý làm ảnh mềm. */
+.profile-card .portrait-frame {
+  width: min(100%, 10rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+
+.profile-card .portrait-frame::after {
+  background: linear-gradient(180deg, transparent 64%, rgba(0,0,0,.34));
+}
+
+.profile-card .portrait-frame img {
+  filter: none;
+  image-rendering: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
