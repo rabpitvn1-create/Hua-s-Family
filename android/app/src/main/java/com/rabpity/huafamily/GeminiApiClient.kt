@@ -53,7 +53,7 @@ object GeminiApiClient {
 
                 lastStatus = response.status
                 lastMessage = extractErrorMessage(response.body, response.status)
-                if (response.status !in ROTATE_KEY_STATUSES) {
+                if (!shouldRotateKey(response.status, lastMessage)) {
                     throw GeminiRequestException(response.status, lastMessage)
                 }
             } catch (error: GeminiRequestException) {
@@ -123,7 +123,7 @@ object GeminiApiClient {
 
         return JSONObject()
             .put(
-                "system_instruction",
+                "systemInstruction",
                 JSONObject().put("parts", JSONArray().put(systemPart))
             )
             .put(
@@ -169,6 +169,15 @@ object GeminiApiClient {
         } catch (_: Throwable) {
             rawBody.trim().take(420).ifBlank { "Gemini API trả lỗi $status." }
         }
+    }
+
+    private fun shouldRotateKey(status: Int, message: String): Boolean {
+        if (status in ROTATE_KEY_STATUSES) return true
+        if (status != 400) return false
+        val normalized = message.lowercase()
+        return normalized.contains("api key") ||
+            normalized.contains("api_key_invalid") ||
+            normalized.contains("key expired")
     }
 
     private data class HttpResult(val status: Int, val body: String)
