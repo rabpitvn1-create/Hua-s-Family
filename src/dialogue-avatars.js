@@ -1,7 +1,34 @@
 import { HUA_SERVANT_AVATAR } from "./hua-servant-avatar.js";
 
+function createObjectUrlFromDataUri(dataUri) {
+  const value = String(dataUri || "");
+  if (!value.startsWith("data:") || typeof URL === "undefined" || typeof Blob === "undefined") {
+    return value;
+  }
+
+  try {
+    const commaIndex = value.indexOf(",");
+    if (commaIndex < 0) return value;
+
+    const metadata = value.slice(5, commaIndex);
+    const payload = value.slice(commaIndex + 1);
+    const mimeType = metadata.split(";")[0] || "application/octet-stream";
+    const binary = /;base64/i.test(metadata) ? atob(payload) : decodeURIComponent(payload);
+    const bytes = new Uint8Array(binary.length);
+
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+
+    return URL.createObjectURL(new Blob([bytes], { type: mimeType }));
+  } catch (error) {
+    console.warn("Không thể chuyển avatar gia nhân sang Blob URL; dùng dữ liệu gốc.", error);
+    return value;
+  }
+}
+
 const huaServantAvatar = Object.freeze({
-  src: HUA_SERVANT_AVATAR,
+  src: createObjectUrlFromDataUri(HUA_SERVANT_AVATAR),
   alt: "Chân dung gia nhân Hứa Gia"
 });
 
@@ -50,6 +77,18 @@ function normalizeSpeaker(value) {
 
 function isHuaServantSpeaker(normalizedName) {
   if (!normalizedName) return false;
+
+  if (
+    normalizedName.startsWith("gia nhân hứa gia")
+    || normalizedName.startsWith("gia nhân nhà họ hứa")
+    || normalizedName.startsWith("người hầu hứa gia")
+    || normalizedName.startsWith("người ở hứa gia")
+    || normalizedName.startsWith("người làm hứa gia")
+    || normalizedName.startsWith("đầy tớ hứa gia")
+    || normalizedName.startsWith("quản gia hứa gia")
+  ) {
+    return true;
+  }
 
   const mentionsHuaFamily = normalizedName.includes("hứa gia")
     || normalizedName.includes("nhà họ hứa")
@@ -102,7 +141,7 @@ function createAvatar(speakerName) {
   image.width = 96;
   image.height = 96;
   image.decoding = "async";
-  image.loading = "lazy";
+  image.loading = "eager";
   image.addEventListener("error", () => {
     image.replaceWith(createFallbackAvatar(speakerName));
   }, { once: true });
