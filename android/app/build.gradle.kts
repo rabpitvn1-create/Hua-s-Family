@@ -61,6 +61,7 @@ val syncWebAssets by tasks.registering(Sync::class) {
         include("ui-components.css")
         include("ai-styles.css")
         include("ui-responsive.css")
+        include("assets/**")
         include("src/**")
         include("api/gemini-prompts.js")
         include("api/gemini-schemas.js")
