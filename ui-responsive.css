@@ -1,0 +1,168 @@
+body.focus-mode .field-rail,
+body.focus-mode .intel-panel { display: none; }
+
+body.focus-mode .game-layout {
+  grid-template-columns: minmax(0,58rem);
+  justify-content: center;
+}
+
+body.focus-mode .story-panel { width: 100%; }
+
+.story-panel.is-entering .scene-header,
+.story-panel.is-entering .story-text,
+.story-panel.is-entering .choice-deck {
+  animation: scene-enter 420ms cubic-bezier(.2,.75,.2,1) both;
+}
+.story-panel.is-entering .story-text { animation-delay: 55ms; }
+.story-panel.is-entering .choice-deck { animation-delay: 105ms; }
+
+@keyframes scene-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scan {
+  from { transform: translateY(-20%); }
+  to { transform: translateY(520%); }
+}
+
+@media (max-width: 1220px) {
+  .game-layout { grid-template-columns: minmax(210px,.65fr) minmax(0,2fr) minmax(270px,.8fr); }
+  .route-ledger li small { display: none; }
+}
+
+@media (max-width: 1020px) {
+  .shell { width: min(100% - 1rem, var(--shell-width)); }
+  .campaign-header { min-height: 6.8rem; }
+  .elysium-stamp { min-width: 15rem; }
+  .game-layout { grid-template-columns: 220px minmax(0,1fr); }
+  .field-rail { position: static; }
+
+  .intel-panel {
+    position: fixed;
+    top: max(.5rem, env(safe-area-inset-top));
+    right: max(.5rem, env(safe-area-inset-right));
+    bottom: max(.5rem, env(safe-area-inset-bottom));
+    z-index: 80;
+    width: min(24rem, calc(100vw - 1rem));
+    max-height: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(calc(100% + 1.5rem));
+    transition: transform 230ms ease, opacity 230ms ease, visibility 230ms ease;
+  }
+  .intel-scroll { max-height: calc(100vh - 5.6rem); }
+  #intel-close { display: grid; place-items: center; }
+
+  .intel-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: block;
+    border: 0;
+    background: rgba(5,3,2,.72);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 230ms ease, visibility 230ms ease;
+  }
+
+  body.intel-open { overflow: hidden; }
+  body.intel-open .intel-panel { opacity: 1; visibility: visible; transform: translateX(0); }
+  body.intel-open .intel-scrim { opacity: 1; visibility: visible; }
+  body.focus-mode .field-rail { display: none; }
+  body.focus-mode .game-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .shell { width: 100%; padding-top: 0; }
+
+  .campaign-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: .85rem;
+    min-height: 0;
+    padding: max(.9rem, env(safe-area-inset-top)) 1rem 1rem;
+    border-left: 0;
+    border-right: 0;
+  }
+  body.native-apk .campaign-header { padding-right: 4.2rem; }
+  h1 { font-size: clamp(2.15rem,11vw,3.25rem); }
+  .elysium-stamp { min-width: 0; padding: .55rem .7rem; }
+  .stamp-sigil { width: 2.2rem; height: 2.2rem; font-size: 1.05rem; }
+
+  .mission-bar {
+    grid-template-columns: auto 1fr auto;
+    margin-top: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .mission-tool { width: 2.6rem; padding: 0; font-size: 0; }
+  .mission-tool span { font-size: 1rem; }
+  .route-readout-copy { font-size: .54rem; }
+
+  .game-layout { grid-template-columns: 1fr; gap: 0; margin-top: 0; }
+  .field-rail {
+    grid-template-columns: 1fr 1fr;
+    gap: .55rem;
+    padding: .65rem;
+    background: #100b08;
+  }
+  .field-rail .operator-card,
+  .field-rail .target-card { min-width: 0; }
+  .portrait-frame { aspect-ratio: 1.8 / 1; }
+  .profile-copy h2 { font-size: 1rem; }
+  .profile-copy p:last-child,
+  .profile-vitals,
+  .encounter-monitor,
+  .route-ledger { display: none; }
+
+  .story-panel {
+    min-height: 0;
+    padding: 1.1rem 1rem 1.25rem;
+    border-left: 0;
+    border-right: 0;
+  }
+  .scene-header h2 { font-size: clamp(2.15rem,11vw,3.35rem); }
+  .story-text { font-size: 1rem; line-height: 1.72; }
+  .story-text .dialogue.has-avatar,
+  .ai-dialogue-line.has-avatar { grid-template-columns: 4rem minmax(0,1fr); column-gap: .68rem; }
+  .story-text .dialogue.has-avatar > .dialogue-avatar,
+  .ai-dialogue-line.has-avatar > .dialogue-avatar { width: 4rem; height: 4rem; }
+  .choice-hint { display: none; }
+  .choice { grid-template-columns: 2.1rem minmax(0,1fr) auto; min-height: 4rem; padding: .68rem .75rem; }
+  .choice-number { width: 1.9rem; height: 1.9rem; }
+
+  .ai-game-master { margin-inline: -.15rem; padding: .85rem; }
+  .ai-heading { gap: .65rem; }
+  .ai-status { max-width: 10.5rem; white-space: normal; }
+  .ai-actions { grid-template-columns: 1fr 1fr; }
+  .ai-actions button:first-child { grid-column: 1 / -1; }
+
+  .campaign-footer {
+    flex-direction: column;
+    padding: .8rem 1rem max(.9rem, env(safe-area-inset-bottom));
+    background: #100b08;
+  }
+}
+
+@media (max-width: 440px) {
+  .header-subtitle,
+  .elysium-stamp small { display: none; }
+  .field-rail { grid-template-columns: 1fr; }
+  .field-rail .target-card { display: none; }
+  .story-text .dialogue.has-avatar,
+  .ai-dialogue-line.has-avatar { grid-template-columns: 3.45rem minmax(0,1fr); }
+  .story-text .dialogue.has-avatar > .dialogue-avatar,
+  .ai-dialogue-line.has-avatar > .dialogue-avatar { width: 3.45rem; height: 3.45rem; }
+  .ai-actions { grid-template-columns: 1fr; }
+  .ai-actions button:first-child { grid-column: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

@@ -11,8 +11,8 @@ on:
       - "api/gemini-state.js"
       - "index.html"
       - "styles.css"
+      - "ui-*.css"
       - "ai-styles.css"
-      - "iphone-ui.css"
       - ".github/workflows/build-android-apk.yml"
   push:
     branches: [main]
@@ -24,8 +24,8 @@ on:
       - "api/gemini-state.js"
       - "index.html"
       - "styles.css"
+      - "ui-*.css"
       - "ai-styles.css"
-      - "iphone-ui.css"
       - ".github/workflows/build-android-apk.yml"
 
 permissions:
