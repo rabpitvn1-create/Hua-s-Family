@@ -1,3 +1,10 @@
+import { HUA_SERVANT_AVATAR } from "./hua-servant-avatar.js";
+
+const huaServantAvatar = Object.freeze({
+  src: HUA_SERVANT_AVATAR,
+  alt: "Chân dung gia nhân Hứa Gia"
+});
+
 const avatarBySpeaker = Object.freeze({
   kai: { src: "assets/avatars/kai.svg", alt: "Chân dung Kai" },
   phantom: { src: "assets/avatars/kai.svg", alt: "Chân dung Kai" },
@@ -8,14 +15,62 @@ const avatarBySpeaker = Object.freeze({
   amy: { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy" },
   delta: { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy" },
   "amy/delta": { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy" },
-  "amy / delta": { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy" }
+  "amy / delta": { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy" },
+  "gia nhân": huaServantAvatar,
+  "gia nhân hứa gia": huaServantAvatar,
+  "gia nhân nhà họ hứa": huaServantAvatar,
+  "người hầu": huaServantAvatar,
+  "người hầu hứa gia": huaServantAvatar,
+  "người ở": huaServantAvatar,
+  "người ở hứa gia": huaServantAvatar,
+  "người làm hứa gia": huaServantAvatar,
+  "đầy tớ hứa gia": huaServantAvatar,
+  "quản gia hứa gia": huaServantAvatar
 });
+
+const genericServantLabels = Object.freeze([
+  "gia nhân",
+  "người hầu",
+  "người ở",
+  "người làm",
+  "đầy tớ",
+  "a hoàn",
+  "hầu gái",
+  "quản gia",
+  "phu bếp",
+  "phu xe"
+]);
 
 function normalizeSpeaker(value) {
   return String(value || "")
     .replace(/\s+/g, " ")
     .trim()
     .toLocaleLowerCase("vi");
+}
+
+function isHuaServantSpeaker(normalizedName) {
+  if (!normalizedName) return false;
+
+  const mentionsHuaFamily = normalizedName.includes("hứa gia")
+    || normalizedName.includes("nhà họ hứa")
+    || normalizedName.includes("phủ hứa")
+    || normalizedName.includes("nhà hứa");
+  const mentionsServantRole = genericServantLabels.some((label) => normalizedName.includes(label));
+
+  if (mentionsHuaFamily && mentionsServantRole) return true;
+
+  return genericServantLabels.some((label) =>
+    normalizedName === label
+    || normalizedName.startsWith(`${label} —`)
+    || normalizedName.startsWith(`${label} -`)
+    || normalizedName.startsWith(`${label}:`)
+  );
+}
+
+function resolveAvatar(speakerName) {
+  const normalizedName = normalizeSpeaker(speakerName);
+  return avatarBySpeaker[normalizedName]
+    || (isHuaServantSpeaker(normalizedName) ? huaServantAvatar : null);
 }
 
 function initialsFor(name) {
@@ -37,7 +92,7 @@ function createFallbackAvatar(speakerName) {
 }
 
 function createAvatar(speakerName) {
-  const avatar = avatarBySpeaker[normalizeSpeaker(speakerName)];
+  const avatar = resolveAvatar(speakerName);
   if (!avatar) return createFallbackAvatar(speakerName);
 
   const image = document.createElement("img");
