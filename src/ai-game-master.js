@@ -1,6 +1,23 @@
+import {
+  hasNativeAiBridge,
+  runNativeCampaignTurn
+} from "./native-ai-pipeline.js";
+
 function cleanText(value, maxLength = 500) {
   return typeof value === "string"
     ? value.replace(/\u0000/g, "").replace(/\s+/g, " ").trim().slice(0, maxLength)
+    : "";
+}
+
+function cleanProse(value, maxLength = 7000) {
+  return typeof value === "string"
+    ? value
+      .replace(/\u0000/g, "")
+      .replace(/\r\n?/g, "\n")
+      .replace(/[ \t]+/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+      .slice(0, maxLength)
     : "";
 }
 
@@ -20,11 +37,19 @@ function normalizeTurn(payload) {
     .slice(0, 3);
 
   return {
-    narration: cleanText(payload?.narration, 7000),
+    narration: cleanProse(payload?.narration, 7000),
     dialogue,
     choices,
     effects: payload?.effects && typeof payload.effects === "object" ? payload.effects : {},
-    worldUpdates: payload?.worldUpdates && typeof payload.worldUpdates === "object" ? payload.worldUpdates : {},
+    campaignEffects: payload?.campaignEffects && typeof payload.campaignEffects === "object"
+      ? payload.campaignEffects
+      : {},
+    progressionUpdate: payload?.progressionUpdate && typeof payload.progressionUpdate === "object"
+      ? payload.progressionUpdate
+      : {},
+    worldUpdates: payload?.worldUpdates && typeof payload.worldUpdates === "object"
+      ? payload.worldUpdates
+      : {},
     summary: cleanText(payload?.summary, 360)
   };
 }
@@ -49,6 +74,7 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
   const configuredEndpoint = typeof window.HUA_GEMINI_ENDPOINT === "string"
     ? window.HUA_GEMINI_ENDPOINT.trim()
     : "";
+  const nativeMode = hasNativeAiBridge();
   const isGitHubPages = window.location.hostname.endsWith("github.io");
   const endpoint = configuredEndpoint || "/api/gemini-turn";
   let busy = false;
@@ -58,9 +84,13 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     elements.status.dataset.kind = kind;
   }
 
+  function isUnavailable() {
+    return !nativeMode && isGitHubPages && !configuredEndpoint;
+  }
+
   function setBusy(value) {
     busy = value;
-    const unavailable = isGitHubPages && !configuredEndpoint;
+    const unavailable = isUnavailable();
     elements.submit.disabled = value || unavailable;
     elements.action.disabled = value || unavailable;
     elements.clear.disabled = value;
@@ -112,6 +142,23 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     renderSuggestions(turn.choices);
   }
 
+  async function requestWebTurn(action) {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        state: bridge.getSnapshot()
+      })
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error || `Backend trả lỗi ${response.status}.`);
+    }
+    return payload;
+  }
+
   async function submitAction() {
     if (busy) return;
     const action = cleanText(elements.action.value, 600);
@@ -121,29 +168,24 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
       return;
     }
 
-    if (isGitHubPages && !configuredEndpoint) {
+    if (isUnavailable()) {
       setStatus("GitHub Pages không có backend", "error");
-      elements.note.textContent = "Bản AI sandbox cần chạy trên Vercel hoặc một backend riêng để giữ API key an toàn.";
+      elements.note.textContent = "Hãy dùng APK Android hoặc cấu hình một backend riêng.";
       return;
     }
 
     setBusy(true);
-    setStatus("Gemini đang phát triển cốt truyện…", "busy");
+    setStatus(
+      nativeMode
+        ? "Firebase AI đang đạo diễn và biên tập…"
+        : "Gemini đang phát triển cốt truyện…",
+      "busy"
+    );
 
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action,
-          state: bridge.getSnapshot()
-        })
-      });
-
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(payload.error || `Backend trả lỗi ${response.status}.`);
-      }
+      const payload = nativeMode
+        ? await runNativeCampaignTurn(bridge.getSnapshot(), action)
+        : await requestWebTurn(action);
 
       const turn = normalizeTurn(payload);
       if (!turn.narration || turn.choices.length !== 3) {
@@ -188,7 +230,17 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
 
   const snapshot = bridge.getSnapshot();
   renderSuggestions(snapshot.scene?.choices || []);
-  setStatus(isGitHubPages && !configuredEndpoint ? "Chưa có backend" : "Sẵn sàng", isGitHubPages && !configuredEndpoint ? "warning" : "ready");
-  elements.note.textContent = "Gemini là đạo diễn cốt truyện chính. Mọi sự kiện phát sinh được ghi vào canon của chiến dịch, nhưng không được sửa canon thế giới.";
+
+  if (nativeMode) {
+    setStatus("APK sẵn sàng", "ready");
+    elements.note.textContent = "APK gọi Gemini qua Firebase AI Logic: Flash-Lite xử lý logic, Flash viết văn.";
+  } else if (isUnavailable()) {
+    setStatus("Chưa có backend", "warning");
+    elements.note.textContent = "GitHub Pages chỉ chứa giao diện. Hãy dùng APK Android hoặc cấu hình backend.";
+  } else {
+    setStatus("Sẵn sàng", "ready");
+    elements.note.textContent = "Gemini là đạo diễn cốt truyện chính. Mọi sự kiện được ghi vào canon chiến dịch.";
+  }
+
   setBusy(false);
 }

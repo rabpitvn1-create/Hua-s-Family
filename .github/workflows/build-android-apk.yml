@@ -1,0 +1,76 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "android/**"
+      - "src/**"
+      - "api/gemini-prompts.js"
+      - "api/gemini-schemas.js"
+      - "api/gemini-state.js"
+      - "index.html"
+      - "styles.css"
+      - "ai-styles.css"
+      - ".github/workflows/build-android-apk.yml"
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - "src/**"
+      - "api/gemini-prompts.js"
+      - "api/gemini-schemas.js"
+      - "api/gemini-state.js"
+      - "index.html"
+      - "styles.css"
+      - "ai-styles.css"
+      - ".github/workflows/build-android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+      FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+      GEMINI_DIRECTOR_MODEL: ${{ vars.GEMINI_DIRECTOR_MODEL }}
+      GEMINI_WRITER_MODEL: ${{ vars.GEMINI_WRITER_MODEL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Check JavaScript modules
+        run: npm run check
+
+      - name: Build debug APK
+        run: gradle -p android :app:assembleDebug --stacktrace
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk HuaGia-LIBERA-1899-debug.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HuaGia-LIBERA-1899-debug-apk
+          path: HuaGia-LIBERA-1899-debug.apk
+          if-no-files-found: error
+          retention-days: 30
