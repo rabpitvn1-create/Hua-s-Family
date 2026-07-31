@@ -1,5 +1,7 @@
 import {
   hasNativeAiBridge,
+  getNativeAiConfiguration,
+  openNativeApiKeySettings,
   runNativeCampaignTurn
 } from "./native-ai-pipeline.js";
 
@@ -66,6 +68,7 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     action: document.querySelector("#ai-action"),
     submit: document.querySelector("#ai-submit"),
     clear: document.querySelector("#ai-clear"),
+    keySettings: document.querySelector("#ai-api-keys"),
     note: document.querySelector("#ai-note")
   };
 
@@ -77,6 +80,7 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
   const nativeMode = hasNativeAiBridge();
   const isGitHubPages = window.location.hostname.endsWith("github.io");
   const endpoint = configuredEndpoint || "/api/gemini-turn";
+  let nativeConfigured = false;
   let busy = false;
 
   function setStatus(text, kind = "idle") {
@@ -85,7 +89,8 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
   }
 
   function isUnavailable() {
-    return !nativeMode && isGitHubPages && !configuredEndpoint;
+    if (nativeMode) return !nativeConfigured;
+    return isGitHubPages && !configuredEndpoint;
   }
 
   function setBusy(value) {
@@ -94,6 +99,23 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     elements.submit.disabled = value || unavailable;
     elements.action.disabled = value || unavailable;
     elements.clear.disabled = value;
+    if (elements.keySettings) elements.keySettings.disabled = value;
+  }
+
+  function refreshNativeConfiguration() {
+    if (!nativeMode) return;
+    const configuration = getNativeAiConfiguration();
+    const keyCount = Math.max(0, Number(configuration?.apiKeyCount) || 0);
+    nativeConfigured = Boolean(configuration?.apiReady && keyCount > 0);
+
+    if (nativeConfigured) {
+      setStatus(`APK sẵn sàng · ${keyCount} key`, "ready");
+      elements.note.textContent = `APK gọi Gemini trực tiếp và luân phiên ${keyCount} API key đã mã hóa trên thiết bị.`;
+    } else {
+      setStatus("Chưa có API key", "warning");
+      elements.note.textContent = "Mở Cấu hình API key, dán mỗi Gemini API key trên một dòng rồi lưu.";
+    }
+    setBusy(busy);
   }
 
   function renderSuggestions(choices) {
@@ -169,15 +191,21 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     }
 
     if (isUnavailable()) {
-      setStatus("GitHub Pages không có backend", "error");
-      elements.note.textContent = "Hãy dùng APK Android hoặc cấu hình một backend riêng.";
+      if (nativeMode) {
+        setStatus("Chưa có API key", "error");
+        elements.note.textContent = "Mở Cấu hình API key để thêm ít nhất một Gemini API key.";
+        openNativeApiKeySettings();
+      } else {
+        setStatus("GitHub Pages không có backend", "error");
+        elements.note.textContent = "Hãy dùng APK Android hoặc cấu hình một backend riêng.";
+      }
       return;
     }
 
     setBusy(true);
     setStatus(
       nativeMode
-        ? "Firebase AI đang đạo diễn và biên tập…"
+        ? "Gemini đang dùng nhóm API key…"
         : "Gemini đang phát triển cốt truyện…",
       "busy"
     );
@@ -217,6 +245,13 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     }
   });
 
+  if (elements.keySettings) {
+    elements.keySettings.hidden = !nativeMode;
+    elements.keySettings.addEventListener("click", () => {
+      openNativeApiKeySettings();
+    });
+  }
+
   window.addEventListener("hua:use-suggestion", (event) => {
     const choice = cleanText(event.detail?.choice, 240);
     if (!choice) return;
@@ -232,8 +267,8 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
   renderSuggestions(snapshot.scene?.choices || []);
 
   if (nativeMode) {
-    setStatus("APK sẵn sàng", "ready");
-    elements.note.textContent = "APK gọi Gemini qua Firebase AI Logic: Flash-Lite xử lý logic, Flash viết văn.";
+    window.__huaApiKeysChanged = refreshNativeConfiguration;
+    refreshNativeConfiguration();
   } else if (isUnavailable()) {
     setStatus("Chưa có backend", "warning");
     elements.note.textContent = "GitHub Pages chỉ chứa giao diện. Hãy dùng APK Android hoặc cấu hình backend.";
