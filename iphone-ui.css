@@ -1,0 +1,56 @@
+:root {
+  --font-iphone-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-iphone-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  font-size: 15px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body,
+body *,
+button,
+textarea,
+input,
+select {
+  font-family: var(--font-iphone-text) !important;
+}
+
+h1,
+h2,
+h3,
+.scene-title,
+.ai-heading h3 {
+  font-family: var(--font-iphone-display) !important;
+}
+
+body {
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.story-text,
+.ai-narration,
+.ai-dialogue-line,
+.choice {
+  letter-spacing: -0.01em;
+}
+
+.eyebrow,
+.build,
+.scene-meta,
+.story-text .speaker,
+.ai-dialogue-line strong,
+.ai-eyebrow,
+.ai-status,
+.ai-game-master label,
+.ai-note,
+dt,
+dd,
+footer {
+  letter-spacing: 0.045em;
+}
