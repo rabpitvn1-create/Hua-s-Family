@@ -2,12 +2,16 @@ package com.rabpity.huafamily
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -28,12 +32,39 @@ class MainActivity : AppCompatActivity() {
 
         keyVault = ApiKeyVault(this)
         webView = createWebView()
-        setContentView(webView)
+        setContentView(createRootView())
         webView.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
 
         if (keyVault.getKeys().isEmpty()) {
             webView.postDelayed({ showApiKeyDialog() }, 650)
         }
+    }
+
+    private fun createRootView(): FrameLayout {
+        val root = FrameLayout(this)
+        root.addView(
+            webView,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
+
+        val settingsButton = ImageButton(this).apply {
+            setImageResource(android.R.drawable.ic_menu_manage)
+            setBackgroundColor(Color.TRANSPARENT)
+            contentDescription = "Cấu hình Gemini API key"
+            alpha = 0.82f
+            setPadding(dp(10), dp(10), dp(10), dp(10))
+            setOnClickListener { showApiKeyDialog() }
+        }
+
+        val buttonLayout = FrameLayout.LayoutParams(dp(48), dp(48), Gravity.TOP or Gravity.END).apply {
+            topMargin = dp(6)
+            marginEnd = dp(6)
+        }
+        root.addView(settingsButton, buttonLayout)
+        return root
     }
 
     private fun showApiKeyDialog() {
@@ -154,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                     activity = this@MainActivity,
                     webView = this,
                     keyVault = keyVault,
-                    openKeySettings = ::showApiKeyDialog
+                    openKeySettings = this@MainActivity::showApiKeyDialog
                 ),
                 "HuaAndroid"
             )
