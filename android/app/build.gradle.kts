@@ -57,8 +57,10 @@ val syncWebAssets by tasks.registering(Sync::class) {
     from(webRoot) {
         include("index.html")
         include("styles.css")
+        include("ui-layout.css")
+        include("ui-components.css")
         include("ai-styles.css")
-        include("iphone-ui.css")
+        include("ui-responsive.css")
         include("src/**")
         include("api/gemini-prompts.js")
         include("api/gemini-schemas.js")
