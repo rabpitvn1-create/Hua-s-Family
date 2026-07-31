@@ -1,6 +1,6 @@
 {
   "name": "hua-family-libera-1899",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vercel dev",
-    "check": "node --check src/campaign-canon.js && node --check src/elysium-agent-codex.js && node --check src/world-canon.js && node --check src/game.js && node --check src/ai-game-master.js && node --check src/dialogue-avatars.js && node --check src/hua-servant-avatar.js && node --check src/app.js && node --check api/gemini-turn.js",
+    "check": "node --check src/campaign-canon.js && node --check src/elysium-agent-codex.js && node --check src/prose-style-guide.js && node --check src/world-canon.js && node --check src/game.js && node --check src/ai-game-master.js && node --check src/dialogue-avatars.js && node --check src/hua-servant-avatar.js && node --check src/app.js && node --check api/gemini-schemas.js && node --check api/gemini-state.js && node --check api/gemini-client.js && node --check api/gemini-prompts.js && node --check api/gemini-pipeline.js && node --check api/gemini-turn.js",
     "test:gemini": "node scripts/test-gemini.mjs"
   }
 }
