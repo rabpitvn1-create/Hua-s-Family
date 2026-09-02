@@ -63,9 +63,7 @@ val syncWebAssets by tasks.registering(Sync::class) {
         include("ui-responsive.css")
         include("assets/**")
         include("src/**")
-        include("api/gemini-prompts.js")
-        include("api/gemini-schemas.js")
-        include("api/gemini-state.js")
+        include("apk-ai/**")
     }
     into(layout.buildDirectory.dir("generated/webAssets/www"))
 }

@@ -3,7 +3,7 @@ import { buildWriterContext } from "./prose-style-guide.js";
 import {
   DIRECTOR_SCHEMA,
   WRITER_SCHEMA
-} from "../api/gemini-schemas.js";
+} from "../apk-ai/gemini-schemas.js";
 import {
   cleanText,
   normalizeState,
@@ -11,11 +11,11 @@ import {
   normalizeProse,
   buildFinalResult,
   compactWriterState
-} from "../api/gemini-state.js";
+} from "../apk-ai/gemini-state.js";
 import {
   buildDirectorSystemInstruction,
   buildWriterSystemInstruction
-} from "../api/gemini-prompts.js";
+} from "../apk-ai/gemini-prompts.js";
 
 const pendingRequests = new Map();
 let sequence = 0;

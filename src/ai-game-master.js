@@ -74,12 +74,7 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
 
   if (!elements.status || !elements.action || !elements.submit || !elements.clear || !elements.note) return;
 
-  const configuredEndpoint = typeof window.HUA_GEMINI_ENDPOINT === "string"
-    ? window.HUA_GEMINI_ENDPOINT.trim()
-    : "";
   const nativeMode = hasNativeAiBridge();
-  const isGitHubPages = window.location.hostname.endsWith("github.io");
-  const endpoint = configuredEndpoint || "/api/gemini-turn";
   let nativeConfigured = false;
   let busy = false;
 
@@ -89,8 +84,7 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
   }
 
   function isUnavailable() {
-    if (nativeMode) return !nativeConfigured;
-    return isGitHubPages && !configuredEndpoint;
+    return !nativeMode || !nativeConfigured;
   }
 
   function setBusy(value) {
@@ -164,23 +158,6 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
     renderSuggestions(turn.choices);
   }
 
-  async function requestWebTurn(action) {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action,
-        state: bridge.getSnapshot()
-      })
-    });
-
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(payload.error || `Backend trả lỗi ${response.status}.`);
-    }
-    return payload;
-  }
-
   async function submitAction() {
     if (busy) return;
     const action = cleanText(elements.action.value, 600);
@@ -190,31 +167,24 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
       return;
     }
 
-    if (isUnavailable()) {
-      if (nativeMode) {
-        setStatus("Chưa có API key", "error");
-        elements.note.textContent = "Mở Cấu hình API key để thêm ít nhất một Gemini API key.";
-        openNativeApiKeySettings();
-      } else {
-        setStatus("GitHub Pages không có backend", "error");
-        elements.note.textContent = "Hãy dùng APK Android hoặc cấu hình một backend riêng.";
-      }
+    if (!nativeMode) {
+      setStatus("Chỉ hỗ trợ APK Android", "error");
+      elements.note.textContent = "Backend web đã bị loại bỏ. AI chỉ chạy qua cầu nối native trong APK.";
+      return;
+    }
+
+    if (!nativeConfigured) {
+      setStatus("Chưa có API key", "error");
+      elements.note.textContent = "Mở Cấu hình API key để thêm ít nhất một Gemini API key.";
+      openNativeApiKeySettings();
       return;
     }
 
     setBusy(true);
-    setStatus(
-      nativeMode
-        ? "Gemini đang dùng nhóm API key…"
-        : "Gemini đang phát triển cốt truyện…",
-      "busy"
-    );
+    setStatus("Gemini đang dùng nhóm API key…", "busy");
 
     try {
-      const payload = nativeMode
-        ? await runNativeCampaignTurn(bridge.getSnapshot(), action)
-        : await requestWebTurn(action);
-
+      const payload = await runNativeCampaignTurn(bridge.getSnapshot(), action);
       const turn = normalizeTurn(payload);
       if (!turn.narration || turn.choices.length !== 3) {
         throw new Error("Gemini trả về lượt chơi chưa đúng cấu trúc.");
@@ -247,9 +217,7 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
 
   if (elements.keySettings) {
     elements.keySettings.hidden = !nativeMode;
-    elements.keySettings.addEventListener("click", () => {
-      openNativeApiKeySettings();
-    });
+    elements.keySettings.addEventListener("click", () => openNativeApiKeySettings());
   }
 
   window.addEventListener("hua:use-suggestion", (event) => {
@@ -269,12 +237,9 @@ export function initAiGameMaster(bridge = window.HUA_GAME_BRIDGE) {
   if (nativeMode) {
     window.__huaApiKeysChanged = refreshNativeConfiguration;
     refreshNativeConfiguration();
-  } else if (isUnavailable()) {
-    setStatus("Chưa có backend", "warning");
-    elements.note.textContent = "GitHub Pages chỉ chứa giao diện. Hãy dùng APK Android hoặc cấu hình backend.";
   } else {
-    setStatus("Sẵn sàng", "ready");
-    elements.note.textContent = "Gemini là đạo diễn cốt truyện chính. Mọi sự kiện được ghi vào canon chiến dịch.";
+    setStatus("Chỉ hỗ trợ APK Android", "warning");
+    elements.note.textContent = "Bản web/backend legacy đã bị loại bỏ. Hãy build và cài APK Android để chơi với Gemini.";
   }
 
   setBusy(false);
