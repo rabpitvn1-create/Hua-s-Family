@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "check": "node --check src/campaign-canon.js && node --check src/elysium-agent-codex.js && node --check src/black-blood-character-codex.js && node --check src/prose-style-guide.js && node --check src/world-canon.js && node --check src/game.js && node --check src/ui-shell.js && node --check src/native-ai-pipeline.js && node --check src/ai-game-master.js && node --check src/dialogue-avatars.js && node --check src/hua-servant-avatar.js && node --check src/app.js && node --check apk-ai/gemini-prompts.js && node --check apk-ai/gemini-schemas.js && node --check apk-ai/gemini-state.js && node scripts/test-character-canon.mjs && node scripts/test-ui.mjs && node scripts/test-standalone-apk.mjs",
+    "check": "node --check src/campaign-canon.js && node --check src/elysium-agent-codex.js && node --check src/active-character-codex.js && node --check src/prose-style-guide.js && node --check src/world-canon.js && node --check src/game.js && node --check src/ui-shell.js && node --check src/native-ai-pipeline.js && node --check src/ai-game-master.js && node --check src/dialogue-avatars.js && node --check src/hua-servant-avatar.js && node --check src/app.js && node --check apk-ai/gemini-prompts.js && node --check apk-ai/gemini-schemas.js && node --check apk-ai/gemini-state.js && node scripts/test-character-canon.mjs && node scripts/test-ui.mjs && node scripts/test-standalone-apk.mjs",
     "test:characters": "node scripts/test-character-canon.mjs",
     "test:ui": "node scripts/test-ui.mjs",
     "test:standalone": "node scripts/test-standalone-apk.mjs"
