@@ -22,7 +22,6 @@ jobs:
       GEMINI_DIRECTOR_MODEL: ${{ vars.GEMINI_DIRECTOR_MODEL }}
       GEMINI_WRITER_MODEL: ${{ vars.GEMINI_WRITER_MODEL }}
       GEMINI_FALLBACK_MODELS: ${{ vars.GEMINI_FALLBACK_MODELS }}
-      OPENROUTER_MODELS: ${{ vars.OPENROUTER_MODELS }}
 
     steps:
       - name: Checkout
@@ -61,7 +60,7 @@ jobs:
       - name: Preflight standalone APK
         run: npm run check
 
-      - name: Verify six API secrets
+      - name: Verify six Gemini API secrets
         shell: bash
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -69,7 +68,7 @@ jobs:
           GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
           GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
           GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
         run: |
           set -euo pipefail
           missing=0
@@ -79,7 +78,7 @@ jobs:
             GEMINI_API_KEY_3 \
             GEMINI_API_KEY_4 \
             GEMINI_API_KEY_5 \
-            OPENROUTER_API_KEY
+            GEMINI_API_KEY_6
           do
             if [[ -z "${!name:-}" ]]; then
               echo "::error::Missing repository secret: ${name}"
@@ -95,7 +94,7 @@ jobs:
           GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
           GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
           GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
         run: gradle -p android :app:assembleDebug --stacktrace
 
       - name: Verify bundled runtime
@@ -141,12 +140,12 @@ jobs:
 
           Standalone Android release.
 
-          - The APK bundles the UI, canon and native Game Master pipeline.
-          - Game Master uses the six-provider pool configured from Hua-s-Family GitHub Secrets at build time.
-          - Each Gemini key tries the configured model ladder before the next key; OpenRouter is the final provider fallback.
+          - The APK bundles the UI, canon and native Gemini Game Master pipeline.
+          - Game Master uses six Gemini API keys configured from Hua-s-Family GitHub Secrets at build time.
+          - Each key tries the configured model ladder before Game Master moves to the next key.
           - The attached APK is the installable debug-signed GitHub build because a production signing key is not configured in the repository.
 
-          Verification: preflight, secret-presence check, Gradle build and bundled-runtime archive checks all run before this release is created.
+          Verification: preflight, six-secret presence check, Gradle build and bundled-runtime archive checks all run before this release is created.
           EOF
 
           gh release create "$TAG" \
