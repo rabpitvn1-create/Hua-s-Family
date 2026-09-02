@@ -2,7 +2,7 @@
 
 ## Kiến trúc
 
-APK đóng gói toàn bộ giao diện web trong Android WebView. Khi người chơi gửi hành động:
+APK đóng gói toàn bộ giao diện web, canon và module AI dùng chung trong Android WebView. Khi người chơi gửi hành động:
 
 1. JavaScript lập dữ liệu cho model đạo diễn.
 2. Kotlin gọi Gemini Developer API trực tiếp qua HTTPS.
@@ -11,7 +11,7 @@ APK đóng gói toàn bộ giao diện web trong Android WebView. Khi người c
 5. Model viết văn tạo lời kể, hội thoại và ba lựa chọn.
 6. Kết quả được lưu vào bộ nhớ cục bộ của WebView.
 
-APK không cần Vercel, Firebase hoặc GitHub Secrets chứa API key.
+Bản này là APK-only. Không có Vercel, GitHub Pages, Firebase, serverless endpoint hoặc GitHub Secret chứa API key trong runtime.
 
 ## Nhập nhiều Gemini API key
 
@@ -55,12 +55,14 @@ Workflow `.github/workflows/build-android-apk.yml` chạy khi:
 - merge thay đổi vào `main`;
 - bấm **Run workflow** thủ công.
 
+Workflow chạy preflight, build APK và kiểm tra trực tiếp archive để xác nhận `index.html`, `src/native-ai-pipeline.js` và `apk-ai/*` đã được đóng gói.
+
 Tải APK:
 
 1. Mở tab **Actions** của repository.
 2. Chọn workflow **Build Android APK**.
 3. Mở run thành công mới nhất.
-4. Trong phần **Artifacts**, tải `HuaGia-LIBERA-1899-debug-apk`.
+4. Trong phần **Artifacts**, tải `HuaGia-LIBERA-1899-standalone-debug-apk`.
 
 APK được giữ 30 ngày trong artifact của GitHub Actions.
 
