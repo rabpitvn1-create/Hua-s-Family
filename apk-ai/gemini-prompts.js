@@ -1,4 +1,4 @@
-import { WORLD_CANON } from "../world-canon.js";
+import { WORLD_CANON } from "../src/world-canon.js";
 
 function compactDirectorCanon() {
   return {
