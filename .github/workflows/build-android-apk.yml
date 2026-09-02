@@ -44,7 +44,6 @@ jobs:
       GEMINI_DIRECTOR_MODEL: ${{ vars.GEMINI_DIRECTOR_MODEL }}
       GEMINI_WRITER_MODEL: ${{ vars.GEMINI_WRITER_MODEL }}
       GEMINI_FALLBACK_MODELS: ${{ vars.GEMINI_FALLBACK_MODELS }}
-      OPENROUTER_MODELS: ${{ vars.OPENROUTER_MODELS }}
 
     steps:
       - name: Checkout
@@ -69,7 +68,7 @@ jobs:
       - name: Preflight standalone APK
         run: npm run check
 
-      - name: Verify six API secrets
+      - name: Verify six Gemini API secrets
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         env:
@@ -78,7 +77,7 @@ jobs:
           GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
           GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
           GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
         run: |
           set -euo pipefail
           missing=0
@@ -88,7 +87,7 @@ jobs:
             GEMINI_API_KEY_3 \
             GEMINI_API_KEY_4 \
             GEMINI_API_KEY_5 \
-            OPENROUTER_API_KEY
+            GEMINI_API_KEY_6
           do
             if [[ -z "${!name:-}" ]]; then
               echo "::error::Missing repository secret: ${name}"
@@ -104,7 +103,7 @@ jobs:
           GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
           GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
           GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
         run: gradle -p android :app:assembleDebug --stacktrace
 
       - name: Verify bundled runtime
