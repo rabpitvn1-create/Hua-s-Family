@@ -22,18 +22,28 @@ class NativeGeminiBridge(
 
     @JavascriptInterface
     fun getConfiguration(): String {
-        val keyCount = keyVault.getKeys().size
+        val bundled = ApiProviderConfig.hasBundledProviders()
+        val localKeys = if (bundled) emptyList() else keyVault.getKeys()
+        val keyCount = if (bundled) {
+            ApiProviderConfig.bundledProviderCount()
+        } else {
+            localKeys.size
+        }
+
         return JSONObject()
             .put("apiReady", keyCount > 0)
             .put("apiKeyCount", keyCount)
             .put("directorModel", BuildConfig.DIRECTOR_MODEL)
             .put("writerModel", BuildConfig.WRITER_MODEL)
-            .put("pipeline", "direct-gemini-multi-key-v1")
+            .put("pipeline", "model-first-six-key-v2")
+            .put("keySource", if (bundled) "github-secrets" else "device-vault")
+            .put("keySettingsAvailable", !bundled)
             .toString()
     }
 
     @JavascriptInterface
     fun openApiKeySettings() {
+        if (ApiProviderConfig.hasBundledProviders()) return
         webView.post(openKeySettings)
     }
 
@@ -45,37 +55,45 @@ class NativeGeminiBridge(
         prompt: String,
         maxOutputTokens: Int
     ) {
-        val keys = keyVault.getKeys()
-        if (keys.isEmpty()) {
-            reject(requestId, "APK chưa có Gemini API key. Hãy mở Cấu hình API key.")
-            return
-        }
-
         if (modelName !in allowedModels) {
             reject(requestId, "Model không nằm trong cấu hình APK.")
             return
         }
 
+        val bundled = ApiProviderConfig.hasBundledProviders()
+        val geminiKeys = if (bundled) {
+            ApiProviderConfig.bundledGeminiKeys()
+        } else {
+            keyVault.getKeys()
+        }
+
+        if (geminiKeys.isEmpty()) {
+            reject(requestId, "APK chưa có Gemini API key khả dụng.")
+            return
+        }
+
+        val geminiModels = ApiProviderConfig.geminiModelCandidates(modelName)
+        if (geminiModels.isEmpty()) {
+            reject(requestId, "Không có model Game Master hợp lệ.")
+            return
+        }
+
         activity.lifecycleScope.launch {
             try {
-                val startIndex = keyVault.getStartIndex(keys.size)
                 val result = withContext(Dispatchers.IO) {
                     GeminiApiClient.generate(
-                        apiKeys = keys,
-                        startIndex = startIndex,
-                        modelName = modelName,
+                        apiKeys = geminiKeys,
+                        modelNames = geminiModels,
                         systemInstruction = systemInstruction,
                         prompt = prompt,
                         maxOutputTokens = maxOutputTokens
                     )
                 }
-
-                keyVault.advanceAfter(result.keyIndex, keys.size)
                 resolve(requestId, result.text)
             } catch (error: Throwable) {
                 reject(
                     requestId,
-                    error.message?.take(500) ?: "Không thể gọi Gemini API."
+                    error.message?.take(500) ?: "Không thể gọi Gemini Game Master."
                 )
             }
         }

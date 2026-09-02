@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(createRootView())
         webView.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
 
-        if (keyVault.getKeys().isEmpty()) {
+        if (!ApiProviderConfig.hasBundledProviders() && keyVault.getKeys().isEmpty()) {
             webView.postDelayed({ showApiKeyDialog() }, 650)
         }
     }
@@ -50,25 +50,28 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        val settingsButton = ImageButton(this).apply {
-            setImageResource(android.R.drawable.ic_menu_manage)
-            setBackgroundColor(Color.TRANSPARENT)
-            contentDescription = "Cấu hình Gemini API key"
-            alpha = 0.82f
-            setPadding(dp(10), dp(10), dp(10), dp(10))
-            setOnClickListener { showApiKeyDialog() }
+        if (!ApiProviderConfig.hasBundledProviders()) {
+            val settingsButton = ImageButton(this).apply {
+                setImageResource(android.R.drawable.ic_menu_manage)
+                setBackgroundColor(Color.TRANSPARENT)
+                contentDescription = "Cấu hình Gemini API key"
+                alpha = 0.82f
+                setPadding(dp(10), dp(10), dp(10), dp(10))
+                setOnClickListener { showApiKeyDialog() }
+            }
+
+            val buttonLayout = FrameLayout.LayoutParams(dp(48), dp(48), Gravity.TOP or Gravity.END).apply {
+                topMargin = dp(6)
+                marginEnd = dp(6)
+            }
+            root.addView(settingsButton, buttonLayout)
         }
 
-        val buttonLayout = FrameLayout.LayoutParams(dp(48), dp(48), Gravity.TOP or Gravity.END).apply {
-            topMargin = dp(6)
-            marginEnd = dp(6)
-        }
-        root.addView(settingsButton, buttonLayout)
         return root
     }
 
     private fun showApiKeyDialog() {
-        if (isFinishing || isDestroyed) return
+        if (isFinishing || isDestroyed || ApiProviderConfig.hasBundledProviders()) return
 
         val existingCount = keyVault.getKeys().size
         val summary = TextView(this).apply {

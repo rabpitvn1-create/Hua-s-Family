@@ -22,6 +22,14 @@ android {
 
         buildConfigField("String", "DIRECTOR_MODEL", "\"${envValue("GEMINI_DIRECTOR_MODEL").ifBlank { "gemini-3.5-flash-lite" }}\"")
         buildConfigField("String", "WRITER_MODEL", "\"${envValue("GEMINI_WRITER_MODEL").ifBlank { "gemini-3.6-flash" }}\"")
+        buildConfigField("String", "GEMINI_FALLBACK_MODELS", "\"${envValue("GEMINI_FALLBACK_MODELS").ifBlank { "gemini-3.5-flash-lite" }}\"")
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${envValue("GEMINI_API_KEY")}\"")
+        buildConfigField("String", "GEMINI_API_KEY_2", "\"${envValue("GEMINI_API_KEY_2")}\"")
+        buildConfigField("String", "GEMINI_API_KEY_3", "\"${envValue("GEMINI_API_KEY_3")}\"")
+        buildConfigField("String", "GEMINI_API_KEY_4", "\"${envValue("GEMINI_API_KEY_4")}\"")
+        buildConfigField("String", "GEMINI_API_KEY_5", "\"${envValue("GEMINI_API_KEY_5")}\"")
+        buildConfigField("String", "GEMINI_API_KEY_6", "\"${envValue("GEMINI_API_KEY_6")}\"")
     }
 
     buildTypes {
