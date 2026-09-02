@@ -1,4 +1,5 @@
 import { getDirectorContext } from "./campaign-canon.js";
+import { sanitizeLegacyCanonState } from "./canon-migration.js";
 import { buildWriterContext } from "./prose-style-guide.js";
 import {
   DIRECTOR_SCHEMA,
@@ -117,7 +118,7 @@ export async function runNativeCampaignTurn(rawState, rawAction) {
   const action = cleanText(rawAction, 600);
   if (!action) throw new Error("Bạn chưa nhập hành động.");
 
-  const state = normalizeState(rawState);
+  const state = normalizeState(sanitizeLegacyCanonState(rawState));
   const directorContext = getDirectorContext(state);
   const directorPrompt = JSON.stringify({
     task: "Lập kế hoạch logic cho đúng một lượt tiếp theo. Không viết văn hoàn chỉnh.",
