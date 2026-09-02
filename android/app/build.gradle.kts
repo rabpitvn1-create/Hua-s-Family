@@ -18,7 +18,7 @@ android {
         minSdk = 23
         targetSdk = 35
         versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1)
-        versionName = "0.2.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}"
+        versionName = "1.0.0"
 
         buildConfigField("String", "DIRECTOR_MODEL", "\"${envValue("GEMINI_DIRECTOR_MODEL").ifBlank { "gemini-3.5-flash-lite" }}\"")
         buildConfigField("String", "WRITER_MODEL", "\"${envValue("GEMINI_WRITER_MODEL").ifBlank { "gemini-3.6-flash" }}\"")
