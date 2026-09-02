@@ -261,84 +261,29 @@ export const CAMPAIGN_ROUTE = freeze([
   }
 ]);
 
-export const CHARACTER_CODEX = freeze({
-  kai: {
-    identity: "Kai; Phantom chỉ là mật danh. Đặc vụ Elysium từ thế kỷ 29.",
-    operation: [
-      "Tư duy, cảm biến, phân tích và tác chiến phải đúng trình độ thế kỷ 29.",
-      "Không quên kỹ năng, trang bị, AI hỗ trợ hoặc phương án hiển nhiên đã được xác lập.",
-      "Chỉ hạn chế công nghệ khi có lý do canon: dòng thời gian, dấu vết, năng lượng, hỏng hóc, con tin hoặc môi trường khắc chế.",
-      "Không để lại công nghệ, thi thể hoặc bằng chứng tương lai ở năm 1899."
-    ]
-  },
-  huaTieuLan: {
-    identity: "Tứ tiểu thư Hứa Gia; mắc bệnh phong; không mang Tử Mẫu Trùng; vật chứa dự kiến của La Sát Mẫu.",
-    mind: [
-      "Trí tuệ chiến lược cao: nhìn hệ thống, thử giả thuyết, đoạt nhịp, giấu kết luận và chơi đường dài.",
-      "Cô không thiếu trí tuệ; cô đang dùng trí tuệ để bảo vệ tiền đề sai rằng Chú Hỏa đang cứu mình.",
-      "Không biết cha gây bệnh, giáo đoàn chuẩn bị hiến tế và Kai tới cứu cho đến khi có bằng chứng trong chiến dịch.",
-      "Cơ thể suy yếu, giảm cảm giác và kiệt sức là giới hạn thật; cô phải dùng người, thời gian, địa hình và thông tin.",
-      "Không phải mục tiêu hộ tống bị động; cô có quyền đặt điều kiện, phản biện, từ chối và tạo kế hoạch."
-    ],
-    voice: "Bình tĩnh, kín, cụ thể; không nói như quân sư cổ đại và không trình diễn toàn bộ suy luận."
-  },
-  amy: {
-    identity: "Amy / Delta, 22 tuổi, đặc vụ song súng thế kỷ 29.",
-    entranceRule: "Không tự xuất hiện nếu chiến dịch chưa tạo nguyên nhân, phương tiện và hậu quả hợp lý.",
-    operation: [
-      "Delta Mind tạo nhiều giả thuyết, tự phản biện và đổi hướng khi dữ liệu bác bỏ.",
-      "Hai súng là hai tuyến tác chiến có mục đích; không bắn loạn, không nhào lộn để trang trí.",
-      "Yêu Kai theo kiểu ám ảnh, chiếm hữu và tuyệt đối nhưng không ngu xuẩn, không giết người vô tội vì ghen và không phá nhiệm vụ vì cảm xúc hời hợt.",
-      "Là đồng đội chiến lược có quyền chủ động, không phải thuộc hạ chờ lệnh."
-    ]
-  },
-  ghostMother: {
-    identity: "La Sát Mẫu / Quỷ Tử Mẫu, Quỷ Vương cấp Thế Giới, chưa giáng thế.",
-    constraints: [
-      "Can thiệp cần điểm neo: Tử Mẫu Trùng, khế ước, huyết thống, điện thờ, Quỷ Tử, vật chứa hoặc vùng bị xâm lấn.",
-      "Không thể hiện thân lâu dài khi thiếu vật chứa và mạng lưới.",
-      "Mục tiêu là xóa quyền tự quyết, biến nhân loại thành một gia đình không thể phản bội.",
-      "Không đồng nhất với Phật giáo, Hārītī chân chính, Dinh Cô hoặc tín ngưỡng Long Hải."
-    ],
-    children: {
-      pheGioi: "Phệ Giới Quỷ Anh — sinh nở, đói khát, xâm lấn thực tại.",
-      laHau: "La Hầu Huyết Đồng — bạo lực, chiến tranh, bảo vệ méo mó.",
-      voDien: "Vô Diện Mộng Nương — ký ức, ảo cảnh, nhu cầu được yêu thương."
-    }
-  },
-  chuHoa: {
-    identity: "Gia chủ, giáo chủ và người giữ Mẫu của Hứa Gia.",
-    operation: [
-      "Thật sự yêu Tiểu Lan nhưng vẫn chủ động hy sinh cô; tình yêu và phản bội cùng tồn tại.",
-      "Dùng chữa lành, gia đình, cơm ăn, việc làm và nỗi sợ bị bỏ rơi để cải đạo.",
-      "Không mặc nhiên biết hay kiểm soát mọi diễn giải của La Sát Mẫu; quan hệ giữa ông và Mẫu còn vùng mơ hồ."
-    ]
-  }
-});
-
 export const NARRATIVE_RULES = freeze({
   sourcePriority: [
     "Mệnh lệnh mới nhất của người dùng",
     "Xương sống chiến dịch và trạng thái hiện tại",
-    "Canon thế giới và hồ sơ nhân vật",
-    "Sự kiện đã phát sinh trong bản lưu",
+    "Canon thế giới và hồ sơ nhân vật hiện hành",
+    "Sự kiện đã phát sinh trong bản lưu sau khi loại bỏ dữ kiện legacy",
     "Quy tắc kỹ thuật viết",
     "Sáng tạo của model"
   ],
   abilities: [
-    "Không hạ thấp nhân vật để bảo vệ cốt truyện; nâng đối trọng để chịu được năng lực thật.",
-    "Nhân vật luôn nhớ kỹ năng, trang bị, khả năng tiếp cận, đạn, năng lượng, thương tích và giới hạn đã biết.",
-    "Ưu tiên phương án hiệu quả nhất cho mục tiêu, dân thường và đồng đội; không chọn phương án kịch tính hơn nếu kém hợp lý.",
-    "Không hồi tố rằng thiết bị hết pin, bị bỏ quên hoặc kỹ năng bị khóa nếu chưa được thiết lập.",
-    "Kỹ năng bị động, cảm biến và AI hỗ trợ phải hoạt động; bị đánh lừa cần đối trọng tương xứng.",
+    "Chỉ active-character-codex.js và sru-codex.js được định nghĩa kỹ năng, trang bị, tính cách và quan hệ của Kai, Iris, Syvial.",
+    "Không hạ thấp nhân vật để bảo vệ cốt truyện; đối trọng phải đến từ quy luật, thông tin, mục tiêu, môi trường hoặc hậu quả có căn cứ.",
+    "Nhân vật luôn nhớ kỹ năng, trang bị, khả năng tiếp cận, thương tích và giới hạn đã khóa trong canon hiện hành.",
+    "Không hồi tố rằng thiết bị hết pin, bị bỏ quên hoặc kỹ năng bị khóa nếu canon hiện hành không thiết lập điều đó.",
+    "Không sáng tác kỹ năng, vũ khí, tổ chức, cooldown, phản phệ hoặc tính cách mới chỉ để tạo kịch tính.",
     "Căng thẳng đến từ đối thủ, thông tin thiếu, mục tiêu xung đột, đạo đức, thời gian, môi trường và nguồn lực hữu hạn; không đến từ việc nhân vật quên."
   ],
   dialogue: [
     "Mỗi lượt thoại có mục đích và làm thay đổi thông tin, lòng tin, quan hệ, quyền chủ động, nguy hiểm hoặc kế hoạch.",
     "Không biến hội thoại thành hai nhân vật đọc lại cốt truyện; không để mọi câu đều sắc bén hoặc cân xứng.",
     "Nhân vật có thể né, trả lời một phần, im lặng hoặc đổi chiến thuật khi cách nói cũ thất bại.",
-    "Xưng hô phản ánh quan hệ và chỉ thay đổi khi có nguyên nhân.",
-    "Cảm xúc phải đổi điều nhân vật chú ý, cách nói và quyết định; hậu quả cảm xúc tiếp tục sang cảnh sau."
+    "Xưng hô phản ánh quan hệ trong active character canon và chỉ thay đổi khi có nguyên nhân.",
+    "Cảm xúc phải đổi điều nhân vật chú ý, cách nói và quyết định; không biến nhãn tsundere/yandere thành trò hề làm mất năng lực."
   ],
   language: [
     "Viết tiếng Việt rõ nghĩa, cụ thể, đúng kết hợp từ và đúng tầng giọng của người nói.",
