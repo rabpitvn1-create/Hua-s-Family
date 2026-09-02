@@ -79,76 +79,14 @@ object GeminiApiClient {
                     continue
                 }
 
-                throw GeminiRequestException(
-                    status = response.status,
-                    message = lastMessage,
-                    allowProviderFallback = false
-                )
+                throw GeminiRequestException(response.status, lastMessage)
             }
         }
 
         val prefix = if (lastStatus > 0) "Gemini trả lỗi $lastStatus" else "Kết nối Gemini thất bại"
         throw GeminiRequestException(
-            status = lastStatus,
-            message = "$prefix sau $attempts lần thử model-first trên ${apiKeys.size} API key: ${lastMessage.take(420)}",
-            allowProviderFallback = true
-        )
-    }
-
-    fun generateOpenRouter(
-        apiKey: String,
-        modelNames: List<String>,
-        systemInstruction: String,
-        prompt: String,
-        maxOutputTokens: Int
-    ): String {
-        val safeKey = apiKey.trim()
-        require(safeKey.isNotBlank()) { "Chưa có OpenRouter API key." }
-
-        val safeModels = modelNames
-            .map(String::trim)
-            .filter { it.matches(Regex("[A-Za-z0-9._:/-]{3,160}")) }
-            .distinct()
-        require(safeModels.isNotEmpty()) { "Không có model OpenRouter hợp lệ." }
-
-        var lastMessage = "Không thể gọi OpenRouter."
-        var lastStatus = 0
-
-        for (modelName in safeModels) {
-            val response = try {
-                requestOpenRouter(
-                    apiKey = safeKey,
-                    modelName = modelName,
-                    systemInstruction = systemInstruction,
-                    prompt = prompt,
-                    maxOutputTokens = maxOutputTokens
-                )
-            } catch (error: IOException) {
-                throw OpenRouterRequestException(
-                    status = 0,
-                    message = error.message ?: "Không thể kết nối OpenRouter."
-                )
-            }
-
-            if (response.status in 200..299) {
-                val text = extractOpenRouterText(response.body)
-                if (text.isNotBlank()) return text
-                lastStatus = response.status
-                lastMessage = "OpenRouter không trả về nội dung."
-                continue
-            }
-
-            lastStatus = response.status
-            lastMessage = extractErrorMessage(response.body, response.status)
-            if (shouldFallbackModel(response.status, lastMessage)) continue
-
-            throw OpenRouterRequestException(response.status, lastMessage)
-        }
-
-        val prefix = if (lastStatus > 0) "OpenRouter trả lỗi $lastStatus" else "OpenRouter thất bại"
-        throw OpenRouterRequestException(
-            status = lastStatus,
-            message = "$prefix sau khi thử ${safeModels.size} model: ${lastMessage.take(420)}"
+            lastStatus,
+            "$prefix sau $attempts lần thử model-first trên ${apiKeys.size} API key: ${lastMessage.take(420)}"
         )
     }
 
@@ -164,44 +102,6 @@ object GeminiApiClient {
             "https://generativelanguage.googleapis.com/v1beta/models/$encodedModel:generateContent"
         ).openConnection() as HttpURLConnection
 
-        return executeRequest(connection) {
-            setRequestProperty("x-goog-api-key", apiKey)
-            val body = buildGeminiRequestBody(
-                systemInstruction = systemInstruction,
-                prompt = prompt,
-                maxOutputTokens = maxOutputTokens
-            ).toString()
-            outputStream.use { stream -> stream.write(body.toByteArray(Charsets.UTF_8)) }
-        }
-    }
-
-    private fun requestOpenRouter(
-        apiKey: String,
-        modelName: String,
-        systemInstruction: String,
-        prompt: String,
-        maxOutputTokens: Int
-    ): HttpResult {
-        val connection = URL("https://openrouter.ai/api/v1/chat/completions")
-            .openConnection() as HttpURLConnection
-
-        return executeRequest(connection) {
-            setRequestProperty("Authorization", "Bearer $apiKey")
-            setRequestProperty("X-Title", "Hua Family LIBERA-1899")
-            val body = buildOpenRouterRequestBody(
-                modelName = modelName,
-                systemInstruction = systemInstruction,
-                prompt = prompt,
-                maxOutputTokens = maxOutputTokens
-            ).toString()
-            outputStream.use { stream -> stream.write(body.toByteArray(Charsets.UTF_8)) }
-        }
-    }
-
-    private inline fun executeRequest(
-        connection: HttpURLConnection,
-        writeBody: HttpURLConnection.() -> Unit
-    ): HttpResult {
         return try {
             connection.requestMethod = "POST"
             connection.connectTimeout = 25_000
@@ -210,7 +110,17 @@ object GeminiApiClient {
             connection.useCaches = false
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             connection.setRequestProperty("Accept", "application/json")
-            connection.writeBody()
+            connection.setRequestProperty("x-goog-api-key", apiKey)
+
+            val body = buildRequestBody(
+                systemInstruction = systemInstruction,
+                prompt = prompt,
+                maxOutputTokens = maxOutputTokens
+            ).toString()
+
+            connection.outputStream.use { stream ->
+                stream.write(body.toByteArray(Charsets.UTF_8))
+            }
 
             val status = connection.responseCode
             val stream = if (status in 200..299) connection.inputStream else connection.errorStream
@@ -221,7 +131,7 @@ object GeminiApiClient {
         }
     }
 
-    private fun buildGeminiRequestBody(
+    private fun buildRequestBody(
         systemInstruction: String,
         prompt: String,
         maxOutputTokens: Int
@@ -250,30 +160,6 @@ object GeminiApiClient {
             )
     }
 
-    private fun buildOpenRouterRequestBody(
-        modelName: String,
-        systemInstruction: String,
-        prompt: String,
-        maxOutputTokens: Int
-    ): JSONObject = JSONObject()
-        .put("model", modelName)
-        .put(
-            "messages",
-            JSONArray()
-                .put(
-                    JSONObject()
-                        .put("role", "system")
-                        .put("content", systemInstruction.take(80_000))
-                )
-                .put(
-                    JSONObject()
-                        .put("role", "user")
-                        .put("content", prompt.take(160_000))
-                )
-        )
-        .put("max_tokens", maxOutputTokens.coerceIn(256, 4_096))
-        .put("stream", false)
-
     private fun extractText(rawBody: String): String {
         val root = JSONObject(rawBody)
         val parts = root
@@ -291,35 +177,15 @@ object GeminiApiClient {
         }.trim()
     }
 
-    private fun extractOpenRouterText(rawBody: String): String {
-        val message = JSONObject(rawBody)
-            .optJSONArray("choices")
-            ?.optJSONObject(0)
-            ?.optJSONObject("message")
-            ?: return ""
-
-        return when (val content = message.opt("content")) {
-            is String -> content.trim()
-            is JSONArray -> buildString {
-                for (index in 0 until content.length()) {
-                    val item = content.optJSONObject(index)
-                    val text = item?.optString("text").orEmpty()
-                    if (text.isNotBlank()) append(text)
-                }
-            }.trim()
-            else -> ""
-        }
-    }
-
     private fun extractErrorMessage(rawBody: String, status: Int): String {
         return try {
             JSONObject(rawBody)
                 .optJSONObject("error")
                 ?.optString("message")
                 ?.takeIf(String::isNotBlank)
-                ?: "API trả lỗi $status."
+                ?: "Gemini API trả lỗi $status."
         } catch (_: Throwable) {
-            rawBody.trim().take(420).ifBlank { "API trả lỗi $status." }
+            rawBody.trim().take(420).ifBlank { "Gemini API trả lỗi $status." }
         }
     }
 
@@ -335,14 +201,13 @@ object GeminiApiClient {
 
     private fun shouldFallbackModel(status: Int, message: String): Boolean {
         if (status in MODEL_FALLBACK_STATUSES) return true
-        if (status !in setOf(400, 403)) return false
+        if (status != 400) return false
         val normalized = message.lowercase()
         return normalized.contains("model") && (
             normalized.contains("not found") ||
                 normalized.contains("unavailable") ||
                 normalized.contains("inactive") ||
-                normalized.contains("not supported") ||
-                normalized.contains("permission")
+                normalized.contains("not supported")
             )
     }
 
@@ -350,14 +215,8 @@ object GeminiApiClient {
 
     class GeminiRequestException(
         val status: Int,
-        message: String,
-        val allowProviderFallback: Boolean
-    ) : Exception(message)
-
-    class OpenRouterRequestException(
-        val status: Int,
         message: String
     ) : Exception(message)
 
-    private val MODEL_FALLBACK_STATUSES = setOf(404, 408, 429, 500, 502, 503, 504)
+    private val MODEL_FALLBACK_STATUSES = setOf(403, 404, 408, 429, 500, 502, 503, 504)
 }
