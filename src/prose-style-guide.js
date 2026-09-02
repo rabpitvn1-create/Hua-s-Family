@@ -32,12 +32,30 @@ const STAGE_TEXTURES = freeze({
 
 const VOICE_CARDS = freeze({
   kai: {
-    name: "Kai / Phantom",
+    name: "Kai Akechi / Twilight",
     rules: [
-      "Ít lời, nói thẳng vào dữ kiện, lựa chọn hoặc mệnh lệnh cần thiết.",
-      "Không pha trò để tỏ ra ngầu; không chế giễu người yếu thế; không đọc lại kết quả cảm biến cho chính mình.",
-      "Khi hỏi cung hoặc thăm dò, câu hỏi ngắn và có đích, thường giấu phần anh đã biết.",
-      "Sự thông minh thể hiện qua thứ anh nhận ra và hành động anh chọn, không qua độc thoại khoe năng lực."
+      "Đời thường có thể lười, châm chọc, tán tỉnh hoặc pha trò; đừng biến mọi câu thành one-liner hay màn khoe sức mạnh.",
+      "Khi nguy hiểm thật, Kai giảm hoặc ngừng banter rất nhanh, nói trực tiếp dữ kiện, lựa chọn hoặc mệnh lệnh cần thiết.",
+      "Không chế giễu người yếu thế và không đọc lại kết quả cảm biến cho chính mình.",
+      "Sự thông minh thể hiện qua thứ anh nhận ra và hành động anh chọn, không qua độc thoại giải thích năng lực."
+    ]
+  },
+  iris: {
+    name: "Iris / ARGUS",
+    rules: [
+      "Nói như người thật, nhanh, rõ và sắc trong nhiệm vụ; không nói như AI đọc báo cáo cảm biến.",
+      "Có thể mềm, nữ tính, càm ràm hoặc tsundere quanh Kai nhưng không dùng bạo lực slapstick hay cư xử trẻ con để thay cảm xúc.",
+      "Iris và Kai dùng xưng hô anh-em theo canon hiện tại; tình cảm của Iris không tự biến hai người thành một cặp.",
+      "Khi bàn chiến thuật, lời nói bám vào tuyến đi, góc bắn, điểm lộ và mục tiêu cần cắt."
+    ]
+  },
+  syvial: {
+    name: "Syvial",
+    rules: [
+      "Nhịp nói của người bình thường trước, câu đắt sau; không phải câu nào cũng cần biểu diễn yandere.",
+      "Có thể mềm, càm ràm, trêu, phản bác hoặc nói thẳng mình đang ghen; không dùng đe dọa rập khuôn chỉ để tỏ ra nguy hiểm.",
+      "Với Kai thoải mái và có banter; khi lo hoặc giận thật thì nói thẳng điều cần biết hoặc hành vi khiến mình khó chịu.",
+      "Ghen tuông không xóa chiến thuật, quan sát hoặc trí thông minh; không tự động thù địch với phụ nữ chỉ vì họ nói chuyện với Kai."
     ]
   },
   tieu_lan: {
@@ -46,13 +64,6 @@ const VOICE_CARDS = freeze({
       "Kín, chính xác, có quyền chủ động; không nói như sách chiến thuật hoặc nhà tiên tri.",
       "Sức khỏe yếu ảnh hưởng nhịp thở, thời gian và lựa chọn, nhưng không biến cô thành người thụ động.",
       "Cô chỉ khẳng định điều có bằng chứng; khi chưa tin, lời nói giữ khoảng cách và kiểm tra đối phương."
-    ]
-  },
-  amy: {
-    name: "Amy / Delta",
-    rules: [
-      "Nhanh, sắc và ám ảnh theo cách có mục tiêu; không biến thành người liên tục châm chọc.",
-      "Lời nói có thể cắt ngắn cảm xúc để giữ nhịp hành động, nhưng vẫn phải dựa trên tình huống."
     ]
   },
   koei: {
@@ -107,6 +118,8 @@ export const PROSE_STYLE_GUIDE = freeze({
     "Ẩn dụ quen tay như 'bóng tối nuốt chửng', 'không khí đặc quánh', 'ánh mắt sắc lạnh', 'nụ cười nhếch mép'.",
     "Động tác rập khuôn như siết chặt nắm tay, nheo mắt hoặc hít sâu ở mọi cảnh.",
     "Kai pha trò vô cớ, khoe sức mạnh hoặc nói dài hơn người đang bị hỏi.",
+    "Iris bị viết như trạm AI/drone từ xa hoặc tsundere bạo lực rập khuôn.",
+    "Syvial bị viết thành sát nhân ngẫu nhiên, mất lý trí vì ghen hoặc nói toàn câu đe dọa cụt lủn.",
     "Gia nhân dùng văn phong cổ trang Trung Hoa hoặc tự khai hết bí mật sau một câu hỏi.",
     "Lặp lại tên nhân vật ở đầu nhiều câu liên tiếp."
   ],
@@ -129,9 +142,10 @@ function normalizeSpeaker(value) {
 function voiceKeyForSpeaker(speaker) {
   const name = normalizeSpeaker(speaker);
   if (!name) return "generic_npc";
-  if (name.includes("kai") || name.includes("phantom")) return "kai";
+  if (name.includes("kai") || name.includes("twilight")) return "kai";
+  if (name.includes("iris") || name.includes("argus")) return "iris";
+  if (name.includes("syvial")) return "syvial";
   if (name.includes("tiểu lan")) return "tieu_lan";
-  if (name.includes("amy") || name.includes("delta")) return "amy";
   if (name.includes("koei")) return "koei";
   if (["gia nhân", "người hầu", "người ở", "người làm", "đầy tớ", "quản gia", "a hoàn", "hầu gái"]
     .some((label) => name.includes(label))) return "hua_servant";
