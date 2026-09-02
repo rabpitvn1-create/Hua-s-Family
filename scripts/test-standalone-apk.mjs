@@ -79,19 +79,17 @@ const secretNames = [
   "GEMINI_API_KEY_3",
   "GEMINI_API_KEY_4",
   "GEMINI_API_KEY_5",
-  "OPENROUTER_API_KEY"
+  "GEMINI_API_KEY_6"
 ];
 
 for (const secretName of secretNames) {
   if (!gradle.includes(`buildConfigField("String", "${secretName}"`)) {
-    throw new Error(`Gradle chưa inject provider secret: ${secretName}`);
+    throw new Error(`Gradle chưa inject Gemini secret: ${secretName}`);
   }
 }
 
-for (const modelConfig of ["GEMINI_FALLBACK_MODELS", "OPENROUTER_MODELS"]) {
-  if (!gradle.includes(`buildConfigField("String", "${modelConfig}"`)) {
-    throw new Error(`Gradle thiếu model fallback config: ${modelConfig}`);
-  }
+if (!gradle.includes('buildConfigField("String", "GEMINI_FALLBACK_MODELS"')) {
+  throw new Error("Gradle thiếu model fallback config.");
 }
 
 const providerConfig = readFileSync(
@@ -103,6 +101,9 @@ for (const secretName of secretNames) {
     throw new Error(`Provider config chưa dùng ${secretName}`);
   }
 }
+if (providerConfig.includes("OPENROUTER")) {
+  throw new Error("Provider config không được kéo OpenRouter từ repo khác vào Hua-s-Family.");
+}
 
 const client = readFileSync(
   "android/app/src/main/java/com/rabpity/huafamily/GeminiApiClient.kt",
@@ -113,15 +114,14 @@ const modelLoop = client.indexOf("for (modelName in safeModels)");
 if (keyLoop < 0 || modelLoop < 0 || modelLoop < keyLoop) {
   throw new Error("Gemini routing không còn theo thứ tự key -> model ladder.");
 }
-for (const token of [
-  "shouldFallbackModel",
-  "allowProviderFallback",
-  "generateOpenRouter",
-  "https://openrouter.ai/api/v1/chat/completions"
-]) {
+for (const token of ["shouldFallbackModel", "GEMINI_API_KEY_6"]) {
+  if (token === "GEMINI_API_KEY_6") continue;
   if (!client.includes(token)) {
-    throw new Error(`Thiếu provider fallback behavior: ${token}`);
+    throw new Error(`Thiếu model fallback behavior: ${token}`);
   }
+}
+if (client.includes("openrouter.ai") || client.includes("generateOpenRouter")) {
+  throw new Error("Gemini client vẫn còn OpenRouter không thuộc secret pool Hua-s-Family.");
 }
 
 const bridge = readFileSync(
@@ -130,16 +130,15 @@ const bridge = readFileSync(
 );
 for (const token of [
   "ApiProviderConfig.bundledGeminiKeys()",
-  "ApiProviderConfig.openRouterKey()",
   "ApiProviderConfig.geminiModelCandidates(modelName)",
-  "model-first-six-provider-v2"
+  "model-first-six-key-v2"
 ]) {
   if (!bridge.includes(token)) {
-    throw new Error(`Native bridge thiếu model-first provider routing: ${token}`);
+    throw new Error(`Native bridge thiếu six-key routing: ${token}`);
   }
 }
-if (bridge.includes("advanceAfter(")) {
-  throw new Error("Native bridge vẫn round-robin key sau mỗi lần thành công.");
+if (bridge.includes("advanceAfter(") || bridge.includes("openRouter")) {
+  throw new Error("Native bridge vẫn còn round-robin hoặc provider ngoài six-key Gemini pool.");
 }
 
 const buildWorkflow = readFileSync(".github/workflows/build-android-apk.yml", "utf8");
@@ -153,6 +152,11 @@ for (const secretName of secretNames) {
     throw new Error(`Release workflow chưa dùng Hua-s-Family secret: ${secretName}`);
   }
 }
+for (const workflow of [buildWorkflow, releaseWorkflow]) {
+  if (workflow.includes("OPENROUTER_API_KEY")) {
+    throw new Error("Workflow vẫn tham chiếu OPENROUTER_API_KEY không tồn tại trong Hua-s-Family.");
+  }
+}
 
 const activity = readFileSync(
   "android/app/src/main/java/com/rabpity/huafamily/MainActivity.kt",
@@ -162,20 +166,17 @@ if (!activity.includes("appassets.androidplatform.net/assets/www/index.html")) {
   throw new Error("MainActivity không khởi động từ web assets đóng gói trong APK.");
 }
 if (!activity.includes("ApiProviderConfig.hasBundledProviders()")) {
-  throw new Error("MainActivity chưa ưu tiên provider pool đóng gói.");
+  throw new Error("MainActivity chưa ưu tiên six-key pool đóng gói.");
 }
 
 const sensitiveSources = [gradle, providerConfig, client, bridge, buildWorkflow, releaseWorkflow];
-const rawSecretPatterns = [
-  /AIza[0-9A-Za-z_-]{20,}/,
-  /sk-or-v1-[0-9A-Za-z_-]{20,}/
-];
+const rawSecretPatterns = [/AIza[0-9A-Za-z_-]{20,}/];
 for (const source of sensitiveSources) {
   for (const pattern of rawSecretPatterns) {
     if (pattern.test(source)) {
-      throw new Error("Phát hiện giá trị API key literal trong source. Chỉ được tham chiếu GitHub Secrets.");
+      throw new Error("Phát hiện giá trị Gemini API key literal trong source. Chỉ được tham chiếu GitHub Secrets.");
     }
   }
 }
 
-console.log("Standalone APK check passed: model-first six-provider routing is wired without raw secrets in source.");
+console.log("Standalone APK check passed: model-first six-Gemini-key routing is wired without raw secrets in source.");
