@@ -33,17 +33,20 @@ const huaServantAvatar = Object.freeze({
   type: "servant"
 });
 
+const kaiAvatar = Object.freeze({
+  src: "assets/avatars/kai.svg",
+  alt: "Chân dung Kai Akechi, mật danh Twilight",
+  type: "sru"
+});
+
 const avatarBySpeaker = Object.freeze({
-  kai: { src: "assets/avatars/kai.svg", alt: "Chân dung Kai", type: "elysium" },
-  phantom: { src: "assets/avatars/kai.svg", alt: "Chân dung Kai", type: "elysium" },
-  "kai / phantom": { src: "assets/avatars/kai.svg", alt: "Chân dung Kai", type: "elysium" },
-  koei: { src: "assets/avatars/koei.svg", alt: "Chân dung Koei", type: "elysium" },
+  kai: kaiAvatar,
+  "kai akechi": kaiAvatar,
+  twilight: kaiAvatar,
+  "kai akechi / twilight": kaiAvatar,
+  "kai akechi/twilight": kaiAvatar,
   "tiểu lan": { src: "assets/avatars/tieu-lan.svg", alt: "Chân dung Hứa Tiểu Lan", type: "target" },
   "hứa tiểu lan": { src: "assets/avatars/tieu-lan.svg", alt: "Chân dung Hứa Tiểu Lan", type: "target" },
-  amy: { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy", type: "elysium" },
-  delta: { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy", type: "elysium" },
-  "amy/delta": { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy", type: "elysium" },
-  "amy / delta": { src: "assets/avatars/amy.jpg", alt: "Chân dung Amy", type: "elysium" },
   "gia nhân": huaServantAvatar,
   "gia nhân hứa gia": huaServantAvatar,
   "gia nhân nhà họ hứa": huaServantAvatar,
