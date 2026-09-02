@@ -6,26 +6,30 @@ on:
     paths:
       - "android/**"
       - "src/**"
-      - "api/gemini-prompts.js"
-      - "api/gemini-schemas.js"
-      - "api/gemini-state.js"
+      - "apk-ai/**"
+      - "assets/**"
       - "index.html"
       - "styles.css"
       - "ui-*.css"
       - "ai-styles.css"
+      - "package.json"
+      - "scripts/test-ui.mjs"
+      - "scripts/test-standalone-apk.mjs"
       - ".github/workflows/build-android-apk.yml"
   push:
     branches: [main]
     paths:
       - "android/**"
       - "src/**"
-      - "api/gemini-prompts.js"
-      - "api/gemini-schemas.js"
-      - "api/gemini-state.js"
+      - "apk-ai/**"
+      - "assets/**"
       - "index.html"
       - "styles.css"
       - "ui-*.css"
       - "ai-styles.css"
+      - "package.json"
+      - "scripts/test-ui.mjs"
+      - "scripts/test-standalone-apk.mjs"
       - ".github/workflows/build-android-apk.yml"
 
 permissions:
@@ -44,6 +48,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
@@ -55,19 +64,31 @@ jobs:
         with:
           gradle-version: "8.11.1"
 
-      - name: Check JavaScript modules
+      - name: Preflight standalone APK
         run: npm run check
 
       - name: Build debug APK
         run: gradle -p android :app:assembleDebug --stacktrace
 
+      - name: Verify bundled runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="android/app/build/outputs/apk/debug/app-debug.apk"
+          unzip -l "$apk" > apk-files.txt
+          grep -q 'assets/www/index.html' apk-files.txt
+          grep -q 'assets/www/src/native-ai-pipeline.js' apk-files.txt
+          grep -q 'assets/www/apk-ai/gemini-prompts.js' apk-files.txt
+          grep -q 'assets/www/apk-ai/gemini-schemas.js' apk-files.txt
+          grep -q 'assets/www/apk-ai/gemini-state.js' apk-files.txt
+
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk HuaGia-LIBERA-1899-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk HuaGia-LIBERA-1899-standalone-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: HuaGia-LIBERA-1899-debug-apk
-          path: HuaGia-LIBERA-1899-debug.apk
+          name: HuaGia-LIBERA-1899-standalone-debug-apk
+          path: HuaGia-LIBERA-1899-standalone-debug.apk
           if-no-files-found: error
           retention-days: 30
