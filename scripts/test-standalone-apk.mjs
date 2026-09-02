@@ -2,11 +2,10 @@ import { existsSync, readFileSync } from "node:fs";
 
 const forbiddenPaths = [
   "vercel.json",
+  ".env.example",
   ".github/workflows/gemini-smoke-test.yml",
   ".github/workflows/pages.yml",
-  "api/gemini-client.js",
-  "api/gemini-pipeline.js",
-  "api/gemini-turn.js",
+  "api",
   "scripts/test-gemini.mjs",
   "docs/DEPLOYMENT_NEXT.md"
 ];
@@ -28,6 +27,32 @@ const gameMaster = readFileSync("src/ai-game-master.js", "utf8");
 for (const token of ["/api/gemini-turn", "HUA_GEMINI_ENDPOINT", "requestWebTurn"]) {
   if (gameMaster.includes(token)) {
     throw new Error(`Game master vẫn còn web backend fallback: ${token}`);
+  }
+}
+
+const packageJson = readFileSync("package.json", "utf8");
+for (const token of ["vercel dev", "test:gemini"]) {
+  if (packageJson.includes(token)) {
+    throw new Error(`package.json vẫn còn deployment/backend legacy: ${token}`);
+  }
+}
+
+const gitignore = readFileSync(".gitignore", "utf8");
+for (const token of [".vercel/", "!.env.example"]) {
+  if (gitignore.includes(token)) {
+    throw new Error(`.gitignore vẫn còn legacy entry: ${token}`);
+  }
+}
+
+const geminiSetup = readFileSync("docs/GEMINI_SETUP.md", "utf8");
+for (const token of [
+  "/api/gemini-turn",
+  "HUA_GEMINI_ENDPOINT",
+  "npm run test:gemini",
+  "Trong project Vercel"
+]) {
+  if (geminiSetup.includes(token)) {
+    throw new Error(`Tài liệu Gemini vẫn hướng dẫn backend legacy: ${token}`);
   }
 }
 
