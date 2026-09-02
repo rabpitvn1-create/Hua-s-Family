@@ -1,11 +1,15 @@
+import { KAI_CODEX } from "./active-character-codex.js";
+
+const KAI_IDENTITY = KAI_CODEX.identity;
+
 const DEFAULT_CHARACTER = Object.freeze({
   id: "kai",
-  name: "Kai",
-  alias: "Phantom",
-  role: "ĐẶC VỤ HIỆN TRƯỜNG",
-  summary: "Sát thủ Elysium · quyền tự chủ tác chiến",
+  name: KAI_IDENTITY.name,
+  alias: KAI_IDENTITY.codename,
+  role: `${KAI_IDENTITY.position.toUpperCase()} SRU`,
+  summary: `${KAI_IDENTITY.combatTier} · chỉ huy hiện trường · xạ thủ chủ lực`,
   image: "assets/avatars/kai.svg",
-  alt: "Chân dung Kai, bí danh Phantom"
+  alt: `Chân dung ${KAI_IDENTITY.name}, mật danh ${KAI_IDENTITY.codename}`
 });
 
 function cleanText(value, fallback, maxLength = 160) {
@@ -30,6 +34,34 @@ function normalizeCharacter(raw = {}) {
     image: safePortrait(raw.image),
     alt: cleanText(raw.alt, `Chân dung ${cleanText(raw.name, DEFAULT_CHARACTER.name, 80)}`, 140)
   };
+}
+
+function replaceHeadingText(heading, name, alias) {
+  if (!(heading instanceof HTMLElement)) return;
+  const aliasNode = heading.querySelector("span");
+  const textNode = [...heading.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
+  if (textNode) textNode.nodeValue = `${name} `;
+  else heading.prepend(document.createTextNode(`${name} `));
+
+  if (aliasNode instanceof HTMLElement) {
+    aliasNode.textContent = alias ? `/ ${alias}` : "";
+    aliasNode.hidden = !alias;
+  }
+}
+
+function syncSnapshotCard(snapshot, character) {
+  const portrait = snapshot.querySelector(".portrait-frame img");
+  const role = snapshot.querySelector(".profile-copy .micro-label");
+  const heading = snapshot.querySelector(".profile-copy h2");
+  const summary = snapshot.querySelector(".profile-copy p:last-child");
+
+  if (portrait instanceof HTMLImageElement) {
+    portrait.src = character.image;
+    portrait.alt = character.alt;
+  }
+  if (role) role.textContent = character.role;
+  replaceHeadingText(heading, character.name, character.alias);
+  if (summary) summary.textContent = character.summary;
 }
 
 function buildOverlay() {
@@ -61,13 +93,14 @@ export function initCharacterSnapshot() {
   const snapshot = document.querySelector(".field-rail .operator-card");
   if (!(snapshot instanceof HTMLElement)) return null;
 
+  syncSnapshotCard(snapshot, DEFAULT_CHARACTER);
   snapshot.classList.add("character-snapshot");
   snapshot.dataset.characterId = DEFAULT_CHARACTER.id;
 
   const trigger = document.createElement("button");
   trigger.type = "button";
   trigger.className = "snapshot-hit-target";
-  trigger.setAttribute("aria-label", "Mở snapshot nhân vật Kai");
+  trigger.setAttribute("aria-label", `Mở snapshot nhân vật ${DEFAULT_CHARACTER.name}`);
   trigger.setAttribute("aria-haspopup", "dialog");
   trigger.setAttribute("aria-controls", "character-overlay");
   trigger.setAttribute("aria-expanded", "false");
@@ -92,11 +125,8 @@ export function initCharacterSnapshot() {
       image.alt = character.alt;
     }
     if (role) role.textContent = character.role;
-    if (name) name.childNodes[0].nodeValue = `${character.name} `;
-    if (alias) {
-      alias.textContent = character.alias ? `/ ${character.alias}` : "";
-      alias.hidden = !character.alias;
-    }
+    replaceHeadingText(name, character.name, character.alias);
+    if (alias instanceof HTMLElement) alias.hidden = !character.alias;
     if (summary) summary.textContent = character.summary;
     if (code) code.textContent = `SNAPSHOT // ${character.id.toUpperCase()}`;
     return character;
