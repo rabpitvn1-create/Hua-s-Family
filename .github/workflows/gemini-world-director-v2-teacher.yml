@@ -1,0 +1,125 @@
+name: Gemini WorldDirector V2 Teacher Batch
+
+on:
+  pull_request:
+    branches: [train/gemini-teacher-smoke]
+    paths:
+      - "scripts/gemini_world_director_v2_teacher.py"
+      - ".github/workflows/gemini-world-director-v2-teacher.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gemini-world-director-v2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  teacher-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GEMINI_TEACHER_MODEL: gemini-3.5-flash-lite
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+      GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
+      GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
+      GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
+
+    steps:
+      - name: Checkout teacher farm
+        uses: actions/checkout@v4
+        with:
+          path: hua
+
+      - name: Checkout BACKROOMS V2 training branch
+        uses: actions/checkout@v4
+        with:
+          repository: rabpitvn1-create/BACKROOMS
+          ref: train/world-director-v2-multiteacher
+          path: backrooms
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify V2 contract tooling
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            hua/scripts/gemini_world_director_v2_teacher.py \
+            backrooms/android-apk/ml/simulate_world_director_v2_trajectories.py \
+            backrooms/android-apk/ml/test_world_director_v2_features.py
+          cd backrooms/android-apk/ml
+          python -m unittest -v test_world_director_v2_features.py
+
+      - name: Generate registered-Level V2 trajectories
+        run: |
+          set -euo pipefail
+          cd backrooms/android-apk/ml
+          python simulate_world_director_v2_trajectories.py \
+            --levels ../app/src/main/assets/levels \
+            --runs 960 \
+            --turns 120 \
+            --history 16 \
+            --history-positions 4 \
+            --seed 2299 \
+            --output "$GITHUB_WORKSPACE/world-director-v2-snapshots.jsonl" \
+            --report "$GITHUB_WORKSPACE/world-director-v2-snapshot-report.json"
+
+      - name: Label six independent V2 shards
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p teacher-v2-labels
+          key_envs=(GEMINI_API_KEY GEMINI_API_KEY_2 GEMINI_API_KEY_3 GEMINI_API_KEY_4 GEMINI_API_KEY_5 GEMINI_API_KEY_6)
+          batch_offset=0
+          pids=()
+          for shard in 0 1 2 3 4 5; do
+            worker=$((shard + 1))
+            python hua/scripts/gemini_world_director_v2_teacher.py \
+              --input world-director-v2-snapshots.jsonl \
+              --output "teacher-v2-labels/teacher-${worker}.jsonl" \
+              --report "teacher-v2-labels/teacher-${worker}-report.json" \
+              --worker "teacher-${worker}" \
+              --key-env "${key_envs[$shard]}" \
+              --shard-index "$shard" \
+              --shard-count 6 \
+              --max-items 144 \
+              --offset "$batch_offset" \
+              --batch-size 8 \
+              --delay-seconds 25 \
+              --seed 2299 &
+            pids+=("$!")
+          done
+          failed=0
+          for pid in "${pids[@]}"; do
+            if ! wait "$pid"; then
+              failed=$((failed + 1))
+            fi
+          done
+          echo "V2 workers with zero usable labels: $failed"
+
+      - name: Merge V2 Gemini labels
+        run: |
+          set -euo pipefail
+          python hua/scripts/merge_gemini_teacher_labels.py \
+            --labels-dir teacher-v2-labels \
+            --output world-director-v2-gemini-labels.jsonl \
+            --report world-director-v2-gemini-report.json
+
+      - name: Upload V2 Gemini teacher dataset
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-director-v2-gemini-teacher-batch
+          path: |
+            world-director-v2-snapshot-report.json
+            teacher-v2-labels/
+            world-director-v2-gemini-labels.jsonl
+            world-director-v2-gemini-report.json
+          if-no-files-found: warn
+          retention-days: 30
