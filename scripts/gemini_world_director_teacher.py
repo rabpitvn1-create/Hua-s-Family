@@ -62,7 +62,14 @@ def priority(snapshot: dict) -> tuple:
     return (-len(legal), -recent_pressure_types, -danger, stable_id(snapshot))
 
 
-def load_shard(path: Path, shard_index: int, shard_count: int, max_items: int, seed: int) -> list[dict]:
+def load_shard(
+    path: Path,
+    shard_index: int,
+    shard_count: int,
+    max_items: int,
+    offset: int,
+    seed: int,
+) -> list[dict]:
     rows = []
     with path.open(encoding="utf-8") as handle:
         for line in handle:
@@ -77,14 +84,19 @@ def load_shard(path: Path, shard_index: int, shard_count: int, max_items: int, s
             if not legal or not legal <= ALLOWED_PROPOSALS:
                 continue
             rows.append(snapshot)
+
     rows.sort(key=priority)
-    if len(rows) <= max_items:
-        return rows
-    # Keep the most informative half, then deterministic diversity from the remainder.
+    if offset >= len(rows):
+        return []
+    pool = rows[offset:]
+    if len(pool) <= max_items:
+        return pool
+
+    # Keep the most informative half from this page, then deterministic diversity from its tail.
     head = max_items // 2
-    selected = rows[:head]
-    rest = rows[head:]
-    random.Random(seed + shard_index).shuffle(rest)
+    selected = pool[:head]
+    rest = pool[head:]
+    random.Random(seed + shard_index + offset).shuffle(rest)
     selected.extend(rest[: max_items - head])
     return selected
 
@@ -153,18 +165,28 @@ def main() -> int:
     parser.add_argument("--shard-index", type=int, required=True)
     parser.add_argument("--shard-count", type=int, default=6)
     parser.add_argument("--max-items", type=int, default=48)
-    parser.add_argument("--delay-seconds", type=float, default=4.0)
+    parser.add_argument("--offset", type=int, default=0)
+    parser.add_argument("--delay-seconds", type=float, default=15.0)
     parser.add_argument("--seed", type=int, default=2299)
     parser.add_argument("--model", default=os.environ.get("GEMINI_TEACHER_MODEL", "gemini-3.5-flash-lite"))
     args = parser.parse_args()
 
     if not 0 <= args.shard_index < args.shard_count:
         raise SystemExit("invalid shard index")
+    if args.offset < 0:
+        raise SystemExit("offset must be non-negative")
     api_key = os.environ.get(args.key_env, "").strip()
     if not api_key:
         raise SystemExit(f"missing teacher secret env: {args.key_env}")
 
-    snapshots = load_shard(Path(args.input), args.shard_index, args.shard_count, args.max_items, args.seed)
+    snapshots = load_shard(
+        Path(args.input),
+        args.shard_index,
+        args.shard_count,
+        args.max_items,
+        args.offset,
+        args.seed,
+    )
     labels = []
     failures = []
     rate_limited = False
@@ -196,6 +218,7 @@ def main() -> int:
     report = {
         "worker": args.worker,
         "model": args.model,
+        "offset": args.offset,
         "selected": len(snapshots),
         "labeled": len(labels),
         "failed": len(failures),
@@ -205,7 +228,10 @@ def main() -> int:
     for failure in failures:
         report["failureCounts"][failure["status"]] = report["failureCounts"].get(failure["status"], 0) + 1
     Path(args.report).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(f"{args.worker}: labeled={len(labels)} failed={len(failures)} rateLimited={rate_limited}")
+    print(
+        f"{args.worker}: offset={args.offset} labeled={len(labels)} "
+        f"failed={len(failures)} rateLimited={rate_limited}"
+    )
     return 0 if labels else 2
 
 
