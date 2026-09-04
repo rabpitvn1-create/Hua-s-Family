@@ -62,6 +62,8 @@ jobs:
           set -euo pipefail
           mkdir -p teacher-labels
           key_envs=(GEMINI_API_KEY GEMINI_API_KEY_2 GEMINI_API_KEY_3 GEMINI_API_KEY_4 GEMINI_API_KEY_5 GEMINI_API_KEY_6)
+          batch_offset=$(( (GITHUB_RUN_NUMBER - 1) * 60 ))
+          echo "Teacher batch offset: $batch_offset"
           pids=()
           for shard in 0 1 2 3 4 5; do
             worker=$((shard + 1))
@@ -73,8 +75,9 @@ jobs:
               --key-env "${key_envs[$shard]}" \
               --shard-index "$shard" \
               --shard-count 6 \
-              --max-items 48 \
-              --delay-seconds 6 \
+              --max-items 60 \
+              --offset "$batch_offset" \
+              --delay-seconds 15 \
               --seed 2299 &
             pids+=("$!")
           done
