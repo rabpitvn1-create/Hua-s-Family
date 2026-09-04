@@ -1,0 +1,112 @@
+name: Gemini WorldDirector Teacher Batch
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/gemini_world_director_teacher.py"
+      - "scripts/merge_gemini_teacher_labels.py"
+      - ".github/workflows/gemini-world-director-teacher.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  teacher-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GEMINI_TEACHER_MODEL: gemini-3.5-flash-lite
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+      GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
+      GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
+      GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
+
+    steps:
+      - name: Checkout teacher farm
+        uses: actions/checkout@v4
+        with:
+          path: hua
+
+      - name: Checkout BACKROOMS trajectory branch
+        uses: actions/checkout@v4
+        with:
+          repository: rabpitvn1-create/BACKROOMS
+          ref: train/world-director-teacher-data
+          path: backrooms
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate registered-Level safe trajectories
+        run: |
+          set -euo pipefail
+          cd backrooms/android-apk/ml
+          python simulate_world_director_trajectories.py \
+            --levels ../app/src/main/assets/levels \
+            --runs 240 \
+            --turns 80 \
+            --history 16 \
+            --seed 2299 \
+            --output "$GITHUB_WORKSPACE/teacher-snapshots.jsonl" \
+            --report "$GITHUB_WORKSPACE/teacher-snapshot-report.json"
+
+      - name: Label six independent teacher shards
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p teacher-labels
+          key_envs=(GEMINI_API_KEY GEMINI_API_KEY_2 GEMINI_API_KEY_3 GEMINI_API_KEY_4 GEMINI_API_KEY_5 GEMINI_API_KEY_6)
+          batch_offset=$(( (GITHUB_RUN_NUMBER - 1) * 60 ))
+          echo "Teacher batch offset: $batch_offset"
+          pids=()
+          for shard in 0 1 2 3 4 5; do
+            worker=$((shard + 1))
+            python hua/scripts/gemini_world_director_teacher.py \
+              --input teacher-snapshots.jsonl \
+              --output "teacher-labels/teacher-${worker}.jsonl" \
+              --report "teacher-labels/teacher-${worker}-report.json" \
+              --worker "teacher-${worker}" \
+              --key-env "${key_envs[$shard]}" \
+              --shard-index "$shard" \
+              --shard-count 6 \
+              --max-items 96 \
+              --offset "$batch_offset" \
+              --batch-size 6 \
+              --delay-seconds 25 \
+              --seed 2299 &
+            pids+=("$!")
+          done
+          failed=0
+          for pid in "${pids[@]}"; do
+            if ! wait "$pid"; then
+              failed=$((failed + 1))
+            fi
+          done
+          echo "Teacher worker processes with zero usable labels: $failed"
+
+      - name: Merge teacher labels
+        run: |
+          set -euo pipefail
+          python hua/scripts/merge_gemini_teacher_labels.py \
+            --labels-dir teacher-labels \
+            --output world-director-teacher-labels.jsonl \
+            --report world-director-teacher-report.json
+
+      - name: Upload teacher dataset
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-director-gemini-teacher-batch
+          path: |
+            teacher-snapshot-report.json
+            teacher-labels/
+            world-director-teacher-labels.jsonl
+            world-director-teacher-report.json
+          if-no-files-found: warn
+          retention-days: 30
