@@ -75,9 +75,10 @@ jobs:
               --key-env "${key_envs[$shard]}" \
               --shard-index "$shard" \
               --shard-count 6 \
-              --max-items 60 \
+              --max-items 96 \
               --offset "$batch_offset" \
-              --delay-seconds 15 \
+              --batch-size 6 \
+              --delay-seconds 25 \
               --seed 2299 &
             pids+=("$!")
           done
