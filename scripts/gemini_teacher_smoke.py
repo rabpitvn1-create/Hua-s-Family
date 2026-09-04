@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-MODEL = os.environ.get("GEMINI_TEACHER_MODEL", "gemini-2.5-flash-lite")
+MODEL = os.environ.get("GEMINI_TEACHER_MODEL", "gemini-3.5-flash-lite")
 OUT = Path(os.environ.get("GEMINI_TEACHER_SMOKE_OUT", "gemini-teacher-smoke.json"))
 WORKERS = [
     ("teacher-1", "GEMINI_API_KEY"),
