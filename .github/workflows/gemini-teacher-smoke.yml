@@ -2,11 +2,6 @@ name: Gemini Teacher Smoke
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - "scripts/gemini_teacher_smoke.py"
-      - ".github/workflows/gemini-teacher-smoke.yml"
 
 permissions:
   contents: read
